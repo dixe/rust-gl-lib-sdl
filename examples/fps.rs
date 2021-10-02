@@ -19,7 +19,7 @@ fn main() -> Result<(), failure::Error> {
 
     let font_path = Path::new("./assets/fonts/Arial.fnt");
     let font = font::Font::load_fnt_font(font_path).unwrap();
-    let text_renderer = text_renderer::TextRenderer::new(&gl, font);
+    let mut text_renderer = text_renderer::TextRenderer::new(&gl, font);
 
     text_renderer.setup_blend(window.gl());
 

@@ -292,6 +292,7 @@ dependencies = [
 [[package]]
 name = "gl_lib"
 version = "0.0.1"
+source = "git+https://github.com/dixe/rust-gl-lib#f57bbd58cb3f651ce948a08448e698c0662cb313"
 dependencies = [
  "failure",
  "gl_generator",
