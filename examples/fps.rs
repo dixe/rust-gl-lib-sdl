@@ -10,7 +10,7 @@ fn main() -> Result<(), failure::Error> {
     let width = 800;
     let height = 600;
 
-    let mut window = gls::SdlGlWindow::new("Text window", width, height).unwrap();
+    let mut window = gls::window::SdlGlWindow::new("Text window", width, height).unwrap();
 
     let gl = &window.gl().clone();
 
@@ -30,7 +30,7 @@ fn main() -> Result<(), failure::Error> {
             window.gl().Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         }
 
-        text_renderer.render_text(gl, &format!("Fps = {} ms", window.deltatime() * 1000.0 ), -0.0, 0.0, 1.0);
+        text_renderer.render_text(&gl, &format!("Fps = {} ms", window.deltatime() * 1000.0 ), -0.0, 0.0, 1.0);
 
         window.gl_swap_window_and_update();
 

@@ -269,16 +269,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0a01e0497841a3b2db4f8afa483cce65f7e96a3498bd6c541734792aeac8fe7"
 
 [[package]]
-name = "gl-lib-sdl"
-version = "0.1.0"
-dependencies = [
- "deltatime",
- "failure",
- "gl_lib",
- "sdl2",
-]
-
-[[package]]
 name = "gl_generator"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -300,6 +290,16 @@ dependencies = [
  "itertools",
  "nalgebra",
  "walkdir",
+]
+
+[[package]]
+name = "gl_lib_sdl"
+version = "0.1.0"
+dependencies = [
+ "deltatime",
+ "failure",
+ "gl_lib",
+ "sdl2",
 ]
 
 [[package]]

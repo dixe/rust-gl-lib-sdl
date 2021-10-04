@@ -10,7 +10,7 @@ fn main() -> Result<(), failure::Error> {
     let width = 800;
     let height = 600;
 
-    let mut window = gls::SdlGlWindow::new("Text window", width, height).unwrap();
+    let mut window = gls::window::SdlGlWindow::new("Text window", width, height).unwrap();
 
     let gl = &window.gl().clone();
 
@@ -31,8 +31,8 @@ fn main() -> Result<(), failure::Error> {
         }
 
 
-        text_renderer.render_text(gl, &format!("Fps = {}", 1.0 / window.deltatime() ), -1.0, 1.0, 1.0);
-        text_renderer.render_text(gl, &TEST_TEXT, -1.0, 0.7, 0.5);
+        text_renderer.render_text(&gl, &format!("Fps = {}", 1.0 / window.deltatime() ), -1.0, 1.0, 1.0);
+        text_renderer.render_text(&gl, &TEST_TEXT, -1.0, 0.7, 0.5);
         window.gl_swap_window_and_update();
 
     }

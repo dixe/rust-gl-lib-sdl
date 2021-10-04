@@ -1,5 +1,5 @@
 [package]
-name = "gl-lib-sdl"
+name = "gl_lib_sdl"
 version = "0.1.0"
 edition = "2018"
 
