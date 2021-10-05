@@ -8,10 +8,10 @@ pub struct Button {
 
 impl Button {
 
-    pub fn new() -> Self {
+    pub fn new(level: Level) -> Self {
         Self {
-            base: ComponentBase::new(),
-            content: "Test btn".to_string()
+            base: ComponentBase::new(level),
+            content: "Test btn".to_string(),
         }
     }
 

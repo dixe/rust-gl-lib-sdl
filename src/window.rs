@@ -2,7 +2,8 @@ use gl_lib::{self, na, gl, gl::viewport};
 use gl_lib::text_rendering::{text_renderer, font};
 use failure;
 use deltatime;
-use crate::components::base::Component;
+use crate::components::base::{ClickRes, Component, ComponentEvent};
+
 
 pub struct SdlGlWindow {
     sdl: sdl2::Sdl,
@@ -15,9 +16,10 @@ pub struct SdlGlWindow {
     quit: bool,
     event_handler: Box<dyn Fn(sdl2::event::Event)>,
     components: Vec::<Box<dyn Component>>,
-    text_renderer: text_renderer::TextRenderer
-
+    text_renderer: text_renderer::TextRenderer,
+    component_events: std::collections::VecDeque<InternalComponentEvent>
 }
+
 
 
 impl SdlGlWindow {
@@ -68,7 +70,7 @@ impl SdlGlWindow {
             event_handler,
             components: Vec::new(),
             text_renderer,
-
+            component_events: std::collections::VecDeque::new(),
         })
 
     }
@@ -91,7 +93,7 @@ impl SdlGlWindow {
         self.deltatime.time()
     }
 
-    /// Render components, Swap gl window, update internal delta time and handle events
+    /// Render components, Swap gl window, update internal delta time and handle sdl_events
     pub fn gl_swap_window_and_update(&mut self) {
         self.render_components();
         self.window.gl_swap_window();
@@ -120,12 +122,20 @@ impl SdlGlWindow {
 
     fn render_components(&mut self) {
         for comp in &self.components {
-            comp.render(&self.gl, &mut self.text_renderer);
+            comp.render(&self.gl, &mut self.text_renderer, self.viewport.w, self.viewport.h);
         }
     }
 
-    pub fn add_component(&mut self, comp: Box<Component> ) {
+    pub fn add_component(&mut self, comp: Box<dyn Component> ) {
         self.components.push(comp);
+    }
+
+    pub fn poll_component_events(&mut self) -> ComponentEventIterator {
+        ComponentEventIterator {
+            events: &mut self.component_events,
+            components: &mut self.components,
+        }
+
     }
 
 
@@ -145,7 +155,21 @@ impl SdlGlWindow {
                 Event::MouseButtonDown {mouse_btn, x, y, ..} => {
                     match mouse_btn {
                         sdl2::mouse::MouseButton::Left => {
-                            println!("Clicked left {:?}",window_to_screen_coords(x,y,self.viewport.w, self.viewport.h));
+                            // TODO: Iter through all that clicks and only store the one furthest up
+                            // TODO: To avoid layered items triggering underneath
+                            for (i,comp) in self.components.iter().enumerate() {
+                                match comp.clicked(x as f32, y as f32) {
+                                    ClickRes::Click(level) => {
+                                        self.component_events.push_back(InternalComponentEvent {
+                                            id: i,
+                                            event: ComponentEvent::Clicked
+                                        });
+
+                                    },
+                                    ClickRes::NoClick => {}
+                                }
+                            }
+
                         }
                         _ => {}
 
@@ -159,18 +183,53 @@ impl SdlGlWindow {
     }
 }
 
+#[must_use = "iterators are lazy and do nothing unless consumed"]
+pub struct ComponentEventIterator<'a> {
+
+    events: &'a mut std::collections::VecDeque<InternalComponentEvent>,
+    components: &'a mut Vec::<Box<dyn Component>>,
+
+
+}
+
+
+
+impl<'a> Iterator for ComponentEventIterator<'a> {
+
+    type Item = ComponentWithEvent<'a>;
+
+    fn next<'b>(&mut self) -> Option<Self::Item> {
+
+        let internal_event = match self.events.pop_front() {
+            None => return None,
+            Some(e) => e,
+        };
+
+        let component = &'a mut self.components[internal_event.id];
+        let cwe = ComponentWithEvent {
+            component,
+            event: internal_event.event,
+        };
+
+        Some(cwe)
+
+    }
+
+}
+
+
+pub struct ComponentWithEvent<'a> {
+    component: &'a mut Box<dyn Component>,
+    event: ComponentEvent
+}
+
+#[derive(Debug,Clone,Copy)]
+struct InternalComponentEvent {
+    id: usize,
+    event: ComponentEvent
+}
+
 
 fn empty_handler( _:sdl2::event::Event)  {
 
-}
-
-
-#[derive(Debug, Copy, Clone)]
-struct ScreenCoord {
-    x: f32, y: f32
-}
-
-fn window_to_screen_coords(x: i32, y: i32, w: i32, h: i32) -> ScreenCoord {
-
-    ScreenCoord {x : (x as f32) *2.0/ (w as f32)  - 1.0, y: (y as f32)*2.0/(h as f32) - 1.0 }
 }

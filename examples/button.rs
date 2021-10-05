@@ -1,5 +1,6 @@
 use gl_lib_sdl as gls;
-use gl_lib_sdl::{gl_lib::{gl, na}, gl_lib::text_rendering::{text_renderer, font}};
+use gl_lib_sdl::{gl_lib::{gl, na}, gl_lib::text_rendering::font};
+
 use failure;
 use std::path::Path;
 
@@ -30,9 +31,11 @@ fn main() -> Result<(), failure::Error> {
             window.gl().Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         }
 
-        window.text_renderer().render_text(gl, "button", -1.0, 1.0, 1.0);
-
         window.gl_swap_window_and_update();
+
+        for e in window.poll_component_events() {
+            println!("{:?}", e);
+        }
     }
 
     Ok(())
@@ -42,7 +45,7 @@ fn main() -> Result<(), failure::Error> {
 
 fn setup_gui(window: &mut gls::window::SdlGlWindow) {
 
-    let button = Box::new(gls::components::button::Button::new());
+    let button = Box::new(gls::components::button::Button::new(0));
 
     window.add_component(button);
 
