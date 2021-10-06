@@ -3,6 +3,7 @@ use gl_lib::text_rendering::{text_renderer, font};
 use failure;
 use deltatime;
 use crate::components::base::{ClickRes, Component, ComponentEvent};
+use crate::components::container::ComponentContainer;
 
 
 pub struct SdlGlWindow {
@@ -15,9 +16,7 @@ pub struct SdlGlWindow {
     event_pump: sdl2::EventPump,
     quit: bool,
     event_handler: Box<dyn Fn(sdl2::event::Event)>,
-    components: Vec::<Box<dyn Component>>,
     text_renderer: text_renderer::TextRenderer,
-    component_events: std::collections::VecDeque<InternalComponentEvent>
 }
 
 
@@ -32,7 +31,6 @@ impl SdlGlWindow {
 
         gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
         gl_attr.set_context_version(4,5);
-
 
 
         let viewport = viewport::Viewport::for_window(width as i32, height as i32);
@@ -68,9 +66,7 @@ impl SdlGlWindow {
             event_pump,
             quit: false,
             event_handler,
-            components: Vec::new(),
             text_renderer,
-            component_events: std::collections::VecDeque::new(),
         })
 
     }
@@ -93,12 +89,19 @@ impl SdlGlWindow {
         self.deltatime.time()
     }
 
+
+
     /// Render components, Swap gl window, update internal delta time and handle sdl_events
-    pub fn gl_swap_window_and_update(&mut self) {
-        self.render_components();
+    pub fn gl_swap_window_and_update(&mut self, mut container: Option<&mut ComponentContainer>) {
+
+        if let Some(cont) = container.as_mut() {
+            self.render_components(*cont);
+
+        };
+
         self.window.gl_swap_window();
         self.deltatime.update();
-        self.handle_events();
+        self.handle_events(container);
     }
 
     pub fn should_quit(&self) -> bool {
@@ -120,26 +123,16 @@ impl SdlGlWindow {
         self.text_renderer.setup_blend(&self.gl);
     }
 
-    fn render_components(&mut self) {
-        for comp in &self.components {
+
+    fn render_components(&mut self, container: &mut ComponentContainer) {
+        for (_, comp) in &container.components {
             comp.render(&self.gl, &mut self.text_renderer, self.viewport.w, self.viewport.h);
         }
     }
 
-    pub fn add_component(&mut self, comp: Box<dyn Component> ) {
-        self.components.push(comp);
-    }
-
-    pub fn poll_component_events(&mut self) -> ComponentEventIterator {
-        ComponentEventIterator {
-            events: &mut self.component_events,
-            components: &mut self.components,
-        }
-
-    }
 
 
-    fn handle_events(&mut self) {
+    fn handle_events(&mut self, mut container: Option<&mut ComponentContainer>) {
 
         use sdl2::event::Event;
         for event in self.event_pump.poll_iter() {
@@ -152,81 +145,20 @@ impl SdlGlWindow {
                     self.viewport.update_size(w, h);
                     self.viewport.set_used(&self.gl);
                 },
-                Event::MouseButtonDown {mouse_btn, x, y, ..} => {
-                    match mouse_btn {
-                        sdl2::mouse::MouseButton::Left => {
-                            // TODO: Iter through all that clicks and only store the one furthest up
-                            // TODO: To avoid layered items triggering underneath
-                            for (i,comp) in self.components.iter().enumerate() {
-                                match comp.clicked(x as f32, y as f32) {
-                                    ClickRes::Click(level) => {
-                                        self.component_events.push_back(InternalComponentEvent {
-                                            id: i,
-                                            event: ComponentEvent::Clicked
-                                        });
-
-                                    },
-                                    ClickRes::NoClick => {}
-                                }
-                            }
-
-                        }
-                        _ => {}
-
-                    }
-                },
                 _ => {}
-
             };
+
+            match container {
+                Some(ref mut cont) => {
+                    cont.handle_sdl_event(event.clone());
+                },
+                None => {},
+            }
+            // TODO: Consider passing events consummed by components
             (self.event_handler)(event);
         }
     }
-}
 
-#[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct ComponentEventIterator<'a> {
-
-    events: &'a mut std::collections::VecDeque<InternalComponentEvent>,
-    components: &'a mut Vec::<Box<dyn Component>>,
-
-
-}
-
-
-
-impl<'a> Iterator for ComponentEventIterator<'a> {
-
-    type Item = ComponentWithEvent<'a>;
-
-    fn next<'b>(&mut self) -> Option<Self::Item> {
-
-        let internal_event = match self.events.pop_front() {
-            None => return None,
-            Some(e) => e,
-        };
-
-        let component = &'a mut self.components[internal_event.id];
-        let cwe = ComponentWithEvent {
-            component,
-            event: internal_event.event,
-        };
-
-        Some(cwe)
-
-    }
-
-}
-
-
-pub struct ComponentWithEvent<'a> {
-    component: &'a mut Box<dyn Component>,
-    event: ComponentEvent
-}
-
-#[derive(Debug,Clone,Copy)]
-struct InternalComponentEvent {
-    id: usize,
-    event: ComponentEvent
 }
 
 

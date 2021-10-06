@@ -22,20 +22,19 @@ fn main() -> Result<(), failure::Error> {
 
     window.setup_blend();
 
+    let mut container = setup_gui();
 
-    setup_gui(&mut window);
-
+    let mut state = 1;
     while !window.should_quit() {
 
         unsafe {
             window.gl().Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         }
 
-        window.gl_swap_window_and_update();
+        window.text_renderer().render_text(&gl, &format!("State = {}", state), 0.0, 0.0, 1.0);
 
-        for e in window.poll_component_events() {
-            println!("{:?}", e);
-        }
+        container.handle_events();
+        window.gl_swap_window_and_update(Some(&mut container));
     }
 
     Ok(())
@@ -43,10 +42,13 @@ fn main() -> Result<(), failure::Error> {
 }
 
 
-fn setup_gui(window: &mut gls::window::SdlGlWindow) {
+fn setup_gui() -> gls::components::container::ComponentContainer {
+
+    let mut container = gls::components::container::ComponentContainer::new();
 
     let button = Box::new(gls::components::button::Button::new(0));
 
-    window.add_component(button);
+    container.add_component(button);
+    container
 
 }
