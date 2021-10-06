@@ -92,7 +92,7 @@ impl SdlGlWindow {
 
 
     /// Render components, Swap gl window, update internal delta time and handle sdl_events
-    pub fn gl_swap_window_and_update(&mut self, mut container: Option<&mut ComponentContainer>) {
+    pub fn gl_swap_window_and_update<T>(&mut self, mut container: Option<&mut ComponentContainer<T>>) {
 
         if let Some(cont) = container.as_mut() {
             self.render_components(*cont);
@@ -124,15 +124,15 @@ impl SdlGlWindow {
     }
 
 
-    fn render_components(&mut self, container: &mut ComponentContainer) {
-        for (_, comp) in &container.components {
+    fn render_components<T>(&mut self, container: &mut ComponentContainer<T>) {
+        for (_, (comp,_)) in &container.components {
             comp.render(&self.gl, &mut self.text_renderer, self.viewport.w, self.viewport.h);
         }
     }
 
 
 
-    fn handle_events(&mut self, mut container: Option<&mut ComponentContainer>) {
+    fn handle_events<T>(&mut self, mut container: Option<&mut ComponentContainer<T>>) {
 
         use sdl2::event::Event;
         for event in self.event_pump.poll_iter() {

@@ -12,7 +12,7 @@ fn main() -> Result<(), failure::Error> {
 
     let font_path = Path::new("./assets/fonts/Arial.fnt");
     let font = font::Font::load_fnt_font(font_path).unwrap();
-    let mut window = gls::window::SdlGlWindow::new("Text window", width, height, font).unwrap();
+    let mut window = gls::window::SdlGlWindow::new("Button", width, height, font).unwrap();
 
 
     let gl = &window.gl().clone();
@@ -33,7 +33,8 @@ fn main() -> Result<(), failure::Error> {
 
         window.text_renderer().render_text(&gl, &format!("State = {}", state), 0.0, 0.0, 1.0);
 
-        container.handle_events();
+        container.handle_events(&mut state);
+
         window.gl_swap_window_and_update(Some(&mut container));
     }
 
@@ -42,13 +43,16 @@ fn main() -> Result<(), failure::Error> {
 }
 
 
-fn setup_gui() -> gls::components::container::ComponentContainer {
+fn setup_gui() -> gls::components::container::ComponentContainer<u32> {
 
     let mut container = gls::components::container::ComponentContainer::new();
 
     let button = Box::new(gls::components::button::Button::new(0));
 
-    container.add_component(button);
+    container.add_component(button, button_handler);
     container
+}
 
+fn button_handler(event: gls::components::base::ComponentEvent, state: &mut u32 ) {
+    *state += 1;
 }

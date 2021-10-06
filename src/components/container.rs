@@ -7,15 +7,15 @@ pub enum HandleRes {
     Unused
 }
 
-pub struct ComponentContainer {
-
+pub struct ComponentContainer<T> {
     next_id: usize,
-    pub components: std::collections::HashMap<usize, Box<dyn Component>>,
-    component_events: std::collections::VecDeque<InternalComponentEvent>
+    pub components: std::collections::HashMap<usize, (Box<dyn Component>, fn(ComponentEvent, &mut T))>,
+    component_events: std::collections::VecDeque<InternalComponentEvent>,
+
 }
 
 
-impl ComponentContainer {
+impl<T> ComponentContainer<T> {
 
     pub fn new() -> Self {
         Self {
@@ -25,20 +25,27 @@ impl ComponentContainer {
         }
     }
 
-    pub fn add_component(&mut self, component: Box<dyn Component>) -> usize {
+    pub fn add_component(&mut self, component: Box<dyn Component>, handler: fn(ComponentEvent, &mut T)) -> usize {
         let id = self.next_id;
-        self.components.insert(id, component);
+        self.components.insert(id, (component, handler));
         self.next_id = self.next_id + 1;
         id
     }
 
 
-    pub fn handle_events(&mut self, event_handlers: std::collections::HashMap<usize, Box<dyn Fn(sdl2::event::Event)>>) {
+    pub fn handle_events(&mut self, state: &mut T) {
 
-        for event in &self.component_events {
+        let mut popped_event = self.component_events.pop_front();
+        while let Some(event) = popped_event {
 
             println!("{:?}", event);
 
+
+            if let Some((_, handler)) =  self.components.get(&event.id) {
+                handler(event.event, state);
+
+            }
+            popped_event = self.component_events.pop_front();
         }
     }
 
@@ -54,13 +61,13 @@ impl ComponentContainer {
                     sdl2::mouse::MouseButton::Left => {
                         // TODO: Iter through all that clicks and only store the one furthest up
                         // TODO: To avoid layered items triggering underneath
-                        for (i,(key, comp)) in self.components.iter().enumerate() {
+                        for (key, (comp, handler)) in &self.components {
 
                             match comp.clicked(x as f32, y as f32) {
                                 ClickRes::Click(level) => {
                                     res = HandleRes::Consumed;
                                     self.component_events.push_back(InternalComponentEvent{
-                                        id: i,
+                                        id: *key,
                                         event: ComponentEvent::Clicked
                                     });
                                 },
