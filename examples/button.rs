@@ -53,6 +53,9 @@ fn setup_gui() -> gls::components::container::ComponentContainer<u32> {
     container
 }
 
-fn button_handler(event: gls::components::base::ComponentEvent, state: &mut u32 ) {
+
+fn button_handler(_event: gls::components::base::ComponentEvent,  comp: &mut dyn gls::components::base::Component, state: &mut u32 ) {
     *state += 1;
+
+    comp.update_content(format!("Btn state {}", state));
 }

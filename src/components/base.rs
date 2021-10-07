@@ -63,6 +63,8 @@ pub trait Component {
 
     fn content(&self) -> &str;
 
+    fn update_content(&mut self, content: String);
+
     fn render(&self, gl: &gl::Gl, tr: &mut TextRenderer, w: i32, h: i32) {
 
         let cb = self.component_base();

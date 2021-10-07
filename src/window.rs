@@ -2,7 +2,6 @@ use gl_lib::{self, na, gl, gl::viewport};
 use gl_lib::text_rendering::{text_renderer, font};
 use failure;
 use deltatime;
-use crate::components::base::{ClickRes, Component, ComponentEvent};
 use crate::components::container::ComponentContainer;
 
 

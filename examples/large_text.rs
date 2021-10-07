@@ -1,5 +1,5 @@
 use gl_lib::{gl, na};
-use gl_lib::text_rendering::{text_renderer, font};
+use gl_lib::text_rendering::{font};
 use gl_lib_sdl as gls;
 use failure;
 use std::path::Path;

@@ -22,7 +22,12 @@ impl Component for Button {
     fn component_base(&self) -> &ComponentBase {
         &self.base
     }
+
     fn content(&self) -> &str {
         &self.content
+    }
+
+    fn update_content(&mut self, content: String) {
+        self.content = content.to_string();
     }
 }
