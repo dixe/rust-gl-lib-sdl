@@ -20,6 +20,7 @@ pub struct SdlGlWindow {
 
 
 
+
 impl SdlGlWindow {
 
     pub fn new(window_text: &str, width: u32, height: u32, font: font::Font ) -> Result<Self, failure::Error> {
@@ -90,17 +91,24 @@ impl SdlGlWindow {
 
 
 
-    /// Render components, Swap gl window, update internal delta time and handle sdl_events
-    pub fn gl_swap_window_and_update<T>(&mut self, mut container: Option<&mut ComponentContainer<T>>) {
+    /// Render components, Swap gl window, update internal delta time and handle sdl_events.
+    /// Finish with clearing color_buffer_bit and depth_buffer_bit
+    pub fn update<T>(&mut self, mut container: Option<(&mut ComponentContainer<T>, &mut T)>) {
 
         if let Some(cont) = container.as_mut() {
-            self.render_components(*cont);
+            self.render_components(cont.0);
 
         };
 
         self.window.gl_swap_window();
         self.deltatime.update();
         self.handle_events(container);
+
+        unsafe {
+            self
+                .gl
+                .Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+        }
     }
 
     pub fn should_quit(&self) -> bool {
@@ -131,7 +139,7 @@ impl SdlGlWindow {
 
 
 
-    fn handle_events<T>(&mut self, mut container: Option<&mut ComponentContainer<T>>) {
+    fn handle_events<T>(&mut self, mut container: Option<(&mut ComponentContainer<T>, &mut T)>) {
 
         use sdl2::event::Event;
         for event in self.event_pump.poll_iter() {
@@ -149,7 +157,7 @@ impl SdlGlWindow {
 
 
             if let Some(ref mut cont) = container {
-                cont.handle_sdl_event(event.clone());
+                cont.0.handle_sdl_event(event.clone(), cont.1);
             }
             // TODO: Consider passing events consummed by components
             (self.event_handler)(event);

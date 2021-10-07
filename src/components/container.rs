@@ -8,12 +8,13 @@ pub enum HandleRes {
 }
 
 pub type Handler<T> = fn(ComponentEvent, &mut dyn Component,  &mut T);
+type ComponentEvents = std::collections::VecDeque<InternalComponentEvent>;
 
+pub type Components<T> = std::collections::HashMap<usize, (Box<dyn Component>, Handler<T>)>;
 pub struct ComponentContainer<T> {
     next_id: usize,
-    pub components: std::collections::HashMap<usize, (Box<dyn Component>, Handler<T>)>,
-    component_events: std::collections::VecDeque<InternalComponentEvent>,
-
+    pub components: Components<T>,
+    component_events: ComponentEvents
 }
 
 
@@ -35,7 +36,7 @@ impl<T> ComponentContainer<T> {
     }
 
 
-    pub fn handle_events(&mut self, state: &mut T) {
+    fn handle_events(&mut self, state: &mut T) {
 
         let mut popped_event = self.component_events.pop_front();
         while let Some(event) = popped_event {
@@ -53,7 +54,7 @@ impl<T> ComponentContainer<T> {
     }
 
 
-    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event) -> HandleRes {
+    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, state: &mut T ) -> HandleRes {
         use sdl2::event::Event;
 
         let mut res = HandleRes::Unused;
@@ -62,23 +63,7 @@ impl<T> ComponentContainer<T> {
             Event::MouseButtonDown {mouse_btn, x, y, ..} => {
                 match mouse_btn {
                     sdl2::mouse::MouseButton::Left => {
-                        // TODO: Iter through all that clicks and only store the one furthest up
-                        // TODO: To avoid layered items triggering underneath
-                        for (key, (comp, _)) in &self.components {
-
-                            match comp.on_top(x as f32, y as f32) {
-                                OnTop::OnTop(_level) => {
-                                    res = HandleRes::Consumed;
-                                    self.component_events.push_back(InternalComponentEvent{
-                                        id: *key,
-                                        event: ComponentEvent::Clicked
-                                    });
-                                },
-                                OnTop::No => {}
-                            }
-
-                        }
-
+                        res = push_component_event(ComponentEvent::Clicked, x as f32, y as f32, &self.components, &mut self.component_events);
                     },
                     sdl2::mouse::MouseButton::Right => {
 
@@ -88,32 +73,43 @@ impl<T> ComponentContainer<T> {
                 }
             },
             Event::MouseMotion{x, y, .. }  => {
-
-                // TODO: Make this into a functions that takes the event to push
-                // TODO: This is repeated and will get complicated
-                for (key, (comp, _)) in &self.components {
-
-                    match comp.on_top(x as f32, y as f32) {
-                        OnTop::OnTop(_level) => {
-                            res = HandleRes::Consumed;
-                            self.component_events.push_back(InternalComponentEvent{
-                                id: *key,
-                                event: ComponentEvent::Hover
-                            });
-                        },
-                        OnTop::No => {}
-                    }
-
-                }
+                res = push_component_event(ComponentEvent::Hover, x as f32, y as f32, &self.components, &mut self.component_events);
 
             }
             _ => {}
 
         };
 
+
+        self.handle_events(state);
         res
     }
 }
+
+
+fn push_component_event<T>(event: ComponentEvent, event_x: f32, event_y: f32, components: &Components<T>, component_events: &mut ComponentEvents) -> HandleRes {
+
+    let mut res = HandleRes::Unused;
+    // TODO: Make this into a functions that takes the event to push
+    // TODO: This is repeated and will get complicated
+    for (key, (comp, _)) in components {
+
+        match comp.on_top(event_x, event_y) {
+            OnTop::OnTop(_level) => {
+                res = HandleRes::Consumed;
+                component_events.push_back(InternalComponentEvent{
+                    id: *key,
+                    event,
+                });
+            },
+            OnTop::No => {}
+        }
+
+    }
+
+    res
+}
+
 
 impl<T> Default for ComponentContainer<T> {
     fn default() -> Self {
