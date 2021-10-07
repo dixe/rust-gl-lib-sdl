@@ -4,7 +4,8 @@ use gl_lib::{gl};
 
 #[derive(Debug,Clone,Copy)]
 pub enum ComponentEvent {
-    Clicked
+    Clicked,
+    Hover
 }
 
 pub type EventHandler = Box<dyn Fn(ComponentEvent)>;
@@ -52,9 +53,9 @@ pub enum Length {
 pub type Level = u32;
 
 #[derive(Debug,Clone,Copy)]
-pub enum ClickRes {
-    NoClick,
-    Click(Level)
+pub enum OnTop {
+    No,
+    OnTop(Level)
 }
 
 pub trait Component {
@@ -76,14 +77,14 @@ pub trait Component {
     // TODO: Maybe have this as an method/function to be implemented
     // And just have helper functions defined on Component
     // Maybe we want circles at some point
-    fn clicked(&self, x: f32, y: f32) -> ClickRes {
+    fn on_top(&self, x: f32, y: f32) -> OnTop {
 
         let cb = self.component_base();
         if x >= cb.pos_x && x <= cb.pos_x + cb.width && y >= cb.pos_y && y <= cb.pos_y + cb.height {
-            return ClickRes::Click(cb.level)
+            return OnTop::OnTop(cb.level)
         }
 
-        ClickRes::NoClick
+        OnTop::No
     }
 }
 

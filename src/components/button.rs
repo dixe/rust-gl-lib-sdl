@@ -28,6 +28,6 @@ impl Component for Button {
     }
 
     fn update_content(&mut self, content: String) {
-        self.content = content.to_string();
+        self.content = content;
     }
 }

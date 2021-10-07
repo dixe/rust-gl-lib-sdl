@@ -124,7 +124,7 @@ impl SdlGlWindow {
 
 
     fn render_components<T>(&mut self, container: &mut ComponentContainer<T>) {
-        for (_, (comp,_)) in &container.components {
+        for (comp,_) in container.components.values() {
             comp.render(&self.gl, &mut self.text_renderer, self.viewport.w, self.viewport.h);
         }
     }
@@ -147,11 +147,9 @@ impl SdlGlWindow {
                 _ => {}
             };
 
-            match container {
-                Some(ref mut cont) => {
-                    cont.handle_sdl_event(event.clone());
-                },
-                None => {},
+
+            if let Some(ref mut cont) = container {
+                cont.handle_sdl_event(event.clone());
             }
             // TODO: Consider passing events consummed by components
             (self.event_handler)(event);

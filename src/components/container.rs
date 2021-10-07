@@ -1,4 +1,4 @@
-use crate::components::base::{ClickRes, Component, ComponentEvent};
+use crate::components::base::{OnTop, Component, ComponentEvent};
 use std::borrow::BorrowMut;
 
 
@@ -30,7 +30,7 @@ impl<T> ComponentContainer<T> {
     pub fn add_component(&mut self, component: Box<dyn Component>, handler: Handler<T>)  -> usize {
         let id = self.next_id;
         self.components.insert(id, (component, handler));
-        self.next_id = self.next_id + 1;
+        self.next_id += 1;
         id
     }
 
@@ -66,29 +66,58 @@ impl<T> ComponentContainer<T> {
                         // TODO: To avoid layered items triggering underneath
                         for (key, (comp, _)) in &self.components {
 
-                            match comp.clicked(x as f32, y as f32) {
-                                ClickRes::Click(_level) => {
+                            match comp.on_top(x as f32, y as f32) {
+                                OnTop::OnTop(_level) => {
                                     res = HandleRes::Consumed;
                                     self.component_events.push_back(InternalComponentEvent{
                                         id: *key,
                                         event: ComponentEvent::Clicked
                                     });
                                 },
-                                ClickRes::NoClick => {}
+                                OnTop::No => {}
                             }
 
                         }
 
-                    }
+                    },
+                    sdl2::mouse::MouseButton::Right => {
+
+                    },
                     _ => {}
 
                 }
             },
+            Event::MouseMotion{x, y, .. }  => {
+
+                // TODO: Make this into a functions that takes the event to push
+                // TODO: This is repeated and will get complicated
+                for (key, (comp, _)) in &self.components {
+
+                    match comp.on_top(x as f32, y as f32) {
+                        OnTop::OnTop(_level) => {
+                            res = HandleRes::Consumed;
+                            self.component_events.push_back(InternalComponentEvent{
+                                id: *key,
+                                event: ComponentEvent::Hover
+                            });
+                        },
+                        OnTop::No => {}
+                    }
+
+                }
+
+            }
             _ => {}
 
         };
 
         res
+    }
+}
+
+impl<T> Default for ComponentContainer<T> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
