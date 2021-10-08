@@ -1,7 +1,6 @@
 use crate::components::base::{OnTop, Component, ComponentEvent};
 use std::borrow::BorrowMut;
 
-
 pub enum HandleRes {
     Consumed,
     Unused
@@ -14,17 +13,19 @@ pub type Components<T> = std::collections::HashMap<usize, (Box<dyn Component>, H
 pub struct ComponentContainer<T> {
     next_id: usize,
     pub components: Components<T>,
-    component_events: ComponentEvents
+    component_events: ComponentEvents,
 }
 
 
 impl<T> ComponentContainer<T> {
 
     pub fn new() -> Self {
+
         Self {
             next_id: 1,
             components: std::collections::HashMap::new(),
-            component_events: std::collections::VecDeque::new()
+            component_events: std::collections::VecDeque::new(),
+
         }
     }
 
@@ -40,7 +41,7 @@ impl<T> ComponentContainer<T> {
 
         let mut popped_event = self.component_events.pop_front();
         while let Some(event) = popped_event {
-            let c =self.components.get_mut(&event.id);
+            let c = self.components.get_mut(&event.id);
 
 
             if let Some(data) = c {
@@ -104,18 +105,11 @@ fn push_component_event<T>(event: ComponentEvent, event_x: f32, event_y: f32, co
             },
             OnTop::No => {}
         }
-
     }
 
     res
 }
 
-
-impl<T> Default for ComponentContainer<T> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 #[derive(Debug,Clone,Copy)]
 struct InternalComponentEvent {

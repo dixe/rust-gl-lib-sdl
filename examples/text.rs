@@ -34,7 +34,7 @@ fn main() -> Result<(), failure::Error> {
         window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), -1.0, 1.0, 1.0);
         window.text_renderer().render_text(&gl, &TEST_TEXT, -1.0, 0.7, 1.0);
 
-        window.gl_swap_window_and_update::<()>(None);
+        window.update::<()>(None);
 
     }
 

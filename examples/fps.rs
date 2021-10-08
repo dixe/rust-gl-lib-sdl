@@ -33,7 +33,7 @@ fn main() -> Result<(), failure::Error> {
         let time_ms =  1.0 / window.deltatime();
         window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), 0.0, 0.0, 1.0);
 
-        window.gl_swap_window_and_update::<()>(None);
+        window.update::<()>(None);
 
     }
 

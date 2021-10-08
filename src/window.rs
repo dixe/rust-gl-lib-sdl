@@ -132,7 +132,7 @@ impl SdlGlWindow {
 
 
     fn render_components<T>(&mut self, container: &mut ComponentContainer<T>) {
-        for (comp,_) in container.components.values() {
+        for (comp, _) in container.components.values() {
             comp.render(&self.gl, &mut self.text_renderer, self.viewport.w, self.viewport.h);
         }
     }

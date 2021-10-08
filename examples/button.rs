@@ -21,14 +21,12 @@ fn main() -> Result<(), failure::Error> {
 
     window.setup_blend();
 
-    let mut container = setup_gui();
+    let mut container = setup_gui(&gl);
 
     let mut state = 1;
 
 
     while !window.should_quit() {
-
-
         window
             .text_renderer()
             .render_text(&gl, &format!("State = {}", state), 0.0, 0.0, 1.0);
@@ -39,10 +37,10 @@ fn main() -> Result<(), failure::Error> {
     Ok(())
 }
 
-fn setup_gui() -> gls::components::container::ComponentContainer<u32> {
+fn setup_gui(gl: &gl::Gl) -> gls::components::container::ComponentContainer<u32> {
     let mut container = gls::components::container::ComponentContainer::new();
 
-    let button = Box::new(gls::components::button::Button::new(0));
+    let button = Box::new(gls::components::button::Button::new(gl, 0));
 
     container.add_component(button, button_handler);
     container
