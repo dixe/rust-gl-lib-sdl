@@ -1,4 +1,4 @@
-use gl_lib::{self, na, gl, gl::viewport};
+use gl_lib::{self, na, gl, gl::viewport, ScreenBox};
 use gl_lib::text_rendering::{text_renderer, font};
 use failure;
 use deltatime;
@@ -132,8 +132,9 @@ impl SdlGlWindow {
 
 
     fn render_components<T>(&mut self, container: &mut ComponentContainer<T>) {
+        let base_screen_box: ScreenBox = Default::default();
         for (comp, _) in container.components.values() {
-            comp.render(&self.gl, &mut self.text_renderer, self.viewport.w, self.viewport.h);
+            comp.render(&self.gl, &mut self.text_renderer, base_screen_box);
         }
     }
 
@@ -157,7 +158,7 @@ impl SdlGlWindow {
 
 
             if let Some(ref mut cont) = container {
-                cont.0.handle_sdl_event(event.clone(), cont.1);
+                cont.0.handle_sdl_event(event.clone(), cont.1, self.viewport.w, self.viewport.h);
             }
             // TODO: Consider passing events consummed by components
             (self.event_handler)(event);

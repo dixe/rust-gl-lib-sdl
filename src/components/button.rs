@@ -1,6 +1,6 @@
 pub use crate::components::base::*;
 use gl_lib::text_rendering::{text_renderer::TextRenderer};
-use gl_lib::{gl, objects::square, shader};
+use gl_lib::{gl, objects::square, shader, ScreenBox};
 
 
 pub struct Button {
@@ -24,9 +24,6 @@ impl Button {
             shader,
         }
     }
-
-
-
 }
 
 impl Component for Button {
@@ -43,13 +40,17 @@ impl Component for Button {
         self.content = content;
     }
 
-    fn render(&self, gl: &gl::Gl, tr: &mut TextRenderer, w: i32, h: i32) {
+    fn render(&self, gl: &gl::Gl, tr: &mut TextRenderer, parent_screen_box: ScreenBox) {
         self.shader.set_used();
 
-        let transform = self.unit_square_transform_matrix(w, h);
+        let transform = self.unit_square_transform_matrix(parent_screen_box);
 
         self.shader.set_mat4(gl, "transform", transform);
         self.square.render(&gl);
-        self.render_text(gl, tr, w, h);
+
+
+        let button_screen_box = parent_screen_box.create_child(self.base.coords, self.base.width, self.base.height);
+
+        self.render_text(gl, tr, button_screen_box);
     }
 }

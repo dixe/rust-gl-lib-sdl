@@ -10,6 +10,7 @@ pub enum ComponentEvent {
 
 pub type EventHandler = Box<dyn Fn(ComponentEvent)>;
 
+
 pub type Level = u32;
 
 

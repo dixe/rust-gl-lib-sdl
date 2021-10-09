@@ -55,7 +55,7 @@ impl<T> ComponentContainer<T> {
     }
 
 
-    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, state: &mut T ) -> HandleRes {
+    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, state: &mut T, w: i32, h: i32 ) -> HandleRes {
         use sdl2::event::Event;
 
         let mut res = HandleRes::Unused;
@@ -64,7 +64,7 @@ impl<T> ComponentContainer<T> {
             Event::MouseButtonDown {mouse_btn, x, y, ..} => {
                 match mouse_btn {
                     sdl2::mouse::MouseButton::Left => {
-                        res = push_component_event(ComponentEvent::Clicked, x as f32, y as f32, &self.components, &mut self.component_events);
+                        res = push_component_event(ComponentEvent::Clicked, x as f32 / w as f32, y as f32 / h as f32, &self.components, &mut self.component_events);
                     },
                     sdl2::mouse::MouseButton::Right => {
 
@@ -74,7 +74,7 @@ impl<T> ComponentContainer<T> {
                 }
             },
             Event::MouseMotion{x, y, .. }  => {
-                res = push_component_event(ComponentEvent::Hover, x as f32, y as f32, &self.components, &mut self.component_events);
+                res = HandleRes::Unused;// push_component_event(ComponentEvent::Hover,  x as f32 / w as f32, y as f32 / h as f32, &self.components, &mut self.component_events);
 
             }
             _ => {}

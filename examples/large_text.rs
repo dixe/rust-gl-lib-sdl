@@ -1,4 +1,4 @@
-use gl_lib::{gl, na};
+use gl_lib::*;
 use gl_lib::text_rendering::{font};
 use gl_lib_sdl as gls;
 use failure;
@@ -22,6 +22,9 @@ fn main() -> Result<(), failure::Error> {
 
     window.setup_blend();
 
+    let sb:ScreenBox = Default::default();
+    let fps_coords = BoxCoords {x: 0.0, y: 0.0};
+    let text_coords = BoxCoords {x: 0.0, y: 0.05};
 
     loop {
 
@@ -31,13 +34,13 @@ fn main() -> Result<(), failure::Error> {
 
 
         let time_ms =  1.0 / window.deltatime();
-        window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), -1.0, 1.0, 1.0);
-        window.text_renderer().render_text(&gl, &TEST_TEXT, -1.0, 0.7, 0.5);
+        window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), fps_coords, Some(sb), 1.0);
+        window.text_renderer().render_text(&gl, &TEST_TEXT, text_coords, Some(sb), 1.0);
+
 
         window.update::<()>(None);
 
     }
-
 }
 
 
