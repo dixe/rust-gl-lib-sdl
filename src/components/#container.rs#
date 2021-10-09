@@ -38,6 +38,9 @@ impl<T> ComponentContainer<T> {
     }
 
 
+    pub fn add_element()
+    
+
     fn handle_events(&mut self, state: &mut T) {
 
         let mut popped_event = self.component_events.pop_front();

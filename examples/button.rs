@@ -47,7 +47,7 @@ fn main() -> Result<(), failure::Error> {
 fn setup_gui(gl: &gl::Gl) -> gls::components::container::ComponentContainer<u32> {
     let mut container = gls::components::container::ComponentContainer::new();
 
-    let button = Box::new(gls::components::button::Button::new(gl, 0));
+    let button = Box::new(gls::components::button::Button::new(gl));
 
     container.add_component(button, button_handler);
     container

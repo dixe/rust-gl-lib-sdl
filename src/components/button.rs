@@ -13,12 +13,12 @@ pub struct Button {
 
 impl Button {
 
-    pub fn new(gl: &gl::Gl, level: Level) -> Self {
+    pub fn new(gl: &gl::Gl) -> Self {
 
         let shader = square::Square::default_shader(gl).unwrap();
 
         Self {
-            base: ComponentBase::new(level),
+            base: ComponentBase::new(),
             content: "Test btn".to_string(),
             square: square::Square::new(gl),
             shader,
@@ -49,7 +49,7 @@ impl Component for Button {
         self.square.render(&gl);
 
 
-        let button_screen_box = parent_screen_box.create_child(self.base.coords, self.base.width, self.base.height);
+        let button_screen_box = parent_screen_box.create_child(self.base.coords, self.base.width(), self.base.height());
 
         self.render_text(gl, tr, button_screen_box);
     }

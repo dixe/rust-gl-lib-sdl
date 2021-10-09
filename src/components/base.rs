@@ -15,14 +15,14 @@ pub type Level = u32;
 
 #[derive(Debug,Clone,Copy)]
 pub struct ComponentBase {
-    pub width: f32,
-    pub height: f32,
+    width: f32,
+    height: f32,
     pub coords: BoxCoords,
     pub level: Level,
 }
 
 impl ComponentBase {
-    pub fn new(level: Level) -> Self {
+    pub fn new() -> Self {
         Self {
             width: 0.1,
             height: 0.05,
@@ -31,8 +31,16 @@ impl ComponentBase {
                 x: 0.2,
                 y: 0.1
             },
-            level,
+            level: 0 ,
         }
+    }
+
+    pub fn width(&self) -> f32 {
+        self.width
+    }
+
+    pub fn height(&self) -> f32 {
+        self.height
     }
 }
 
