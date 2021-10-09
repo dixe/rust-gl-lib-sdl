@@ -6,10 +6,10 @@ pub enum HandleRes {
     Unused
 }
 
-pub type Handler<T> = fn(ComponentEvent, &mut dyn Component,  &mut T);
+pub type Handler<T> = fn(ComponentEvent, &mut Component,  &mut T);
 type ComponentEvents = std::collections::VecDeque<InternalComponentEvent>;
 
-pub type Components<T> = std::collections::HashMap<usize, (Box<dyn Component>, Handler<T>)>;
+pub type Components<T> = std::collections::HashMap<usize, (Component, Handler<T>)>;
 
 pub struct ComponentContainer<T> {
     next_id: usize,
@@ -30,7 +30,7 @@ impl<T> ComponentContainer<T> {
         }
     }
 
-    pub fn add_component(&mut self, component: Box<dyn Component>, handler: Handler<T>)  -> usize {
+    pub fn add_component(&mut self, component: Component, handler: Handler<T>)  -> usize {
         let id = self.next_id;
         self.components.insert(id, (component, handler));
         self.next_id += 1;
@@ -46,7 +46,7 @@ impl<T> ComponentContainer<T> {
 
 
             if let Some(data) = c {
-                let comp = (*data.0).borrow_mut();
+                let comp = &mut data.0;
                 data.1(event.event, comp, state);
 
             }

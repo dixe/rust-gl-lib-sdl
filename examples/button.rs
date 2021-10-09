@@ -1,5 +1,6 @@
 use gl_lib_sdl as gls;
 use gl_lib_sdl::{
+    components::base,
     gl_lib::text_rendering::font,
     gl_lib::{gl, na, BoxCoords, ScreenCoords, ScreenBox}
 };
@@ -47,15 +48,13 @@ fn main() -> Result<(), failure::Error> {
 fn setup_gui(gl: &gl::Gl) -> gls::components::container::ComponentContainer<u32> {
     let mut container = gls::components::container::ComponentContainer::new();
 
-    let button = Box::new(gls::components::button::Button::new(gl));
-
-    container.add_component(button, button_handler);
+    container.add_component(base::button(gl), button_handler);
     container
 }
 
 fn button_handler(
     event: gls::components::base::ComponentEvent,
-    comp: &mut dyn gls::components::base::Component,
+    comp: &mut gls::components::base::Component,
     state: &mut u32,
 ) {
     use gls::components::base::ComponentEvent;
