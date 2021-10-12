@@ -1,10 +1,13 @@
-
 pub mod row;
 
+pub mod attributes;
 
 pub mod element;
 
+#[derive(Debug,Clone, Copy)]
 pub struct RealizedSize {
-    pub width: u32,
-    pub height: u32
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32
 }

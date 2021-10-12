@@ -1,5 +1,6 @@
 use gl_lib_sdl as gls;
 use gl_lib_sdl::{
+    components::base,
     gl_lib::text_rendering::font,
     gl_lib::{gl, na, BoxCoords, ScreenCoords, ScreenBox}
 };
@@ -21,9 +22,10 @@ fn main() -> Result<(), failure::Error> {
 
     window.setup_blend();
 
-    let mut container = setup_gui(&gl, width, height);
+    let mut container = setup_gui(&gl, width as f32, height as f32);
+    //let mut container = setup_gui_old(&gl);
 
-    let mut state = 1;
+    let mut state: i32 = 1;
 
 
     let sb:ScreenBox = Default::default();
@@ -44,74 +46,78 @@ fn main() -> Result<(), failure::Error> {
     Ok(())
 }
 
-fn setup_gui_old(gl: &gl::Gl) -> gls::components::container::ComponentContainer<u32> {
+fn setup_gui_old(gl: &gl::Gl) -> gls::components::container::ComponentContainer<i32> {
     let mut container = gls::components::container::ComponentContainer::new();
 
-    let button_1 = Box::new(gls::components::button::Button::new(gl));
-
-    let button_2 = Box::new(gls::components::button::Button::new(gl));
-
-    container.add_component(button_1, button_handler_1);
-
-    container.add_component(button_2, button_handler_2);
+    container.add_component(base::button(&gl), button_handler_1);
     container
 }
 
 
-fn setup_gui(gl: &gl::Gl, width: u32, height: u32) -> gls::components::container::ComponentContainer<u32> {
+fn setup_gui(gl: &gl::Gl, width: f32, height: f32) -> gls::components::container::ComponentContainer<i32> {
     use gls::layout::row::*;
     use gls::layout::*;
     use gls::layout::element::*;
-    use gls::components::attributes::*;
-    use gls::components::button::*;
+    use gls::layout::attributes::*;
 
 
-    let mut root_row = Row::new(Size { width: LengthAttrib::No(Length::Fill), height: LengthAttrib::Max(Length::Px(100)) });
 
-    let btn_elm = ComponentElement::new(Box::new(Button::new(gl)), button_handler_1, Size {
+    let mut root_row = Row::new(Size { width: LengthAttrib::No(Length::Fill), height: LengthAttrib::Max(Length::Px(100.0)) });
+
+
+    let mut btn = base::button(gl);
+
+    btn.update_content("Add".to_string());
+    let btn_elm = ComponentElement::new(btn, button_handler_1, Size {
         width: LengthAttrib::No(Length::Fill),
-        height: LengthAttrib::No(Length::Px(200)),
+        height: LengthAttrib::No(Length::Px(50.)),
     });
-
 
     root_row.add(Box::new(btn_elm));
 
 
+    let mut btn2 = base::button(gl);
+    btn2.update_content("Sub".to_string());
+
+    let btn_elm_2 = ComponentElement::new(btn2, button_handler_2, Size {
+        width: LengthAttrib::No(Length::Fill),
+        height: LengthAttrib::No(Length::Px(50.)),
+    });
+
+
+
+    root_row.add(Box::new(btn_elm_2));
     let mut cont = gls::components::container::ComponentContainer::new();
 
-    root_row.add_to_container(&mut cont, RealizedSize {width, height});
+    root_row.add_to_container(&mut cont, &RealizedSize { x: 0.0, y: 0.0, width, height });
 
     cont
 
 }
 
 
-fn button_handler_1(
-    event: gls::components::base::ComponentEvent,
-    comp: &mut dyn gls::components::base::Component,
-    state: &mut u32,
-) {
+fn button_handler_1(event: gls::components::base::ComponentEvent, comp: &mut gls::components::base::Component, state: &mut i32) {
     use gls::components::base::ComponentEvent;
+
     match event {
         ComponentEvent::Clicked => {
+            //println!("ADD");
             *state += 1;
-            comp.update_content(format!("Btn state {}", state));
         }
         _ => {}
     }
 }
 
 
-fn button_handler_2(
-    event: gls::components::base::ComponentEvent,
-    comp: &mut dyn gls::components::base::Component,
-    state: &mut u32,
-) {
+fn button_handler_2(event: gls::components::base::ComponentEvent, comp: &mut gls::components::base::Component, state: &mut i32) {
     use gls::components::base::ComponentEvent;
+
+
     match event {
         ComponentEvent::Clicked => {
+            //println!("SUB");
+
             *state -= 1;
-            comp.update_content(format!("Btn state {}", state));
         }
         _ => {}
     }

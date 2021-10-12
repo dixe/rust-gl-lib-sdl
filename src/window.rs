@@ -1,4 +1,4 @@
-use gl_lib::{self, na, gl, gl::viewport, ScreenBox};
+use gl_lib::{self, na, gl, gl::viewport, ScreenBox, objects::square};
 use gl_lib::text_rendering::{text_renderer, font};
 use failure;
 use deltatime;
@@ -16,6 +16,7 @@ pub struct SdlGlWindow {
     quit: bool,
     event_handler: Box<dyn Fn(sdl2::event::Event)>,
     text_renderer: text_renderer::TextRenderer,
+    render_square: square::Square
 }
 
 
@@ -56,6 +57,8 @@ impl SdlGlWindow {
         let text_renderer = text_renderer::TextRenderer::new(&gl, font);
 
 
+        let render_square = square::Square::new(&gl);
+
         Ok(Self {
             gl,
             sdl,
@@ -67,6 +70,7 @@ impl SdlGlWindow {
             quit: false,
             event_handler,
             text_renderer,
+            render_square
         })
 
     }
@@ -132,10 +136,10 @@ impl SdlGlWindow {
 
 
     fn render_components<T>(&mut self, container: &mut ComponentContainer<T>) {
-        let base_screen_box: ScreenBox = Default::default();
         for (comp, _) in container.components.values() {
-            comp.render(&self.gl, &mut self.text_renderer, base_screen_box);
+            comp.render(&self.gl, &mut self.text_renderer, &self.render_square, self.viewport.w as f32, self.viewport.h as f32);
         }
+
     }
 
 
@@ -158,7 +162,7 @@ impl SdlGlWindow {
 
 
             if let Some(ref mut cont) = container {
-                cont.0.handle_sdl_event(event.clone(), cont.1, self.viewport.w, self.viewport.h);
+                cont.0.handle_sdl_event(event.clone(), cont.1);
             }
             // TODO: Consider passing events consummed by components
             (self.event_handler)(event);

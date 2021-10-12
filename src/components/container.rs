@@ -1,5 +1,5 @@
 use crate::components::base::{OnTop, Component, ComponentEvent};
-use std::borrow::BorrowMut;
+
 
 pub enum HandleRes {
     Consumed,
@@ -26,7 +26,6 @@ impl<T> ComponentContainer<T> {
             next_id: 1,
             components: std::collections::HashMap::new(),
             component_events: std::collections::VecDeque::new(),
-
         }
     }
 
@@ -47,6 +46,17 @@ impl<T> ComponentContainer<T> {
 
             if let Some(data) = c {
                 let comp = &mut data.0;
+
+                let _ = match event.event {
+                    ComponentEvent::Hover => {
+                        comp.base.hover = true;
+                    },
+                    ComponentEvent::HoverEnd => {
+                        comp.base.hover = false;
+                    },
+                    _ => {},
+                };
+
                 data.1(event.event, comp, state);
 
             }
@@ -56,7 +66,7 @@ impl<T> ComponentContainer<T> {
     }
 
 
-    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, state: &mut T, w: i32, h: i32 ) -> HandleRes {
+    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, state: &mut T ) -> HandleRes {
         use sdl2::event::Event;
 
         let mut res = HandleRes::Unused;
@@ -65,7 +75,7 @@ impl<T> ComponentContainer<T> {
             Event::MouseButtonDown {mouse_btn, x, y, ..} => {
                 match mouse_btn {
                     sdl2::mouse::MouseButton::Left => {
-                        res = push_component_event(ComponentEvent::Clicked, x as f32 / w as f32, y as f32 / h as f32, &self.components, &mut self.component_events);
+                        res = push_component_event(ComponentEvent::Clicked, x as f32, y as f32, &self.components, &mut self.component_events, None);
                     },
                     sdl2::mouse::MouseButton::Right => {
 
@@ -75,7 +85,8 @@ impl<T> ComponentContainer<T> {
                 }
             },
             Event::MouseMotion{x, y, .. }  => {
-                res = HandleRes::Unused;// push_component_event(ComponentEvent::Hover,  x as f32 / w as f32, y as f32 / h as f32, &self.components, &mut self.component_events);
+                res = push_component_event(ComponentEvent::Hover,  x as f32, y as f32, &self.components, &mut self.component_events, Some(hover_no_match));
+
 
             }
             _ => {}
@@ -88,8 +99,19 @@ impl<T> ComponentContainer<T> {
     }
 }
 
+fn hover_no_match(key: usize, component: &Component, component_events: &mut ComponentEvents) {
 
-fn push_component_event<T>(event: ComponentEvent, event_x: f32, event_y: f32, components: &Components<T>, component_events: &mut ComponentEvents) -> HandleRes {
+    if component.base.hover {
+        component_events.push_back(InternalComponentEvent{
+            id: key,
+            event: ComponentEvent::HoverEnd
+        });
+    }
+}
+
+type NoMatchFn = fn (key: usize, component: &Component, component_events: &mut ComponentEvents);
+
+fn push_component_event<T>(event: ComponentEvent, event_x: f32, event_y: f32, components: &Components<T>, component_events: &mut ComponentEvents, noMatch: Option<NoMatchFn>) -> HandleRes {
 
     let mut res = HandleRes::Unused;
     // TODO: Make this into a functions that takes the event to push
@@ -103,8 +125,13 @@ fn push_component_event<T>(event: ComponentEvent, event_x: f32, event_y: f32, co
                     id: *key,
                     event,
                 });
+
             },
-            OnTop::No => {}
+            OnTop::No => {
+                if let Some(noMatchFn) = noMatch {
+                    noMatchFn(*key, comp,  component_events);
+                }
+            }
         }
     }
 

@@ -29,7 +29,7 @@ pub enum LengthAttrib {
 #[derive(Debug,Clone,Copy)]
 pub enum Length {
     /// Length equal to given number of pixels
-    Px(u32),
+    Px(f32),
 
     /// Fill all the avialable space
     /// Is equivalent to FillPortion 1

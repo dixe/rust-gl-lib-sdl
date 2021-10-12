@@ -2,7 +2,7 @@ use gl_lib_sdl as gls;
 use gl_lib_sdl::{
     components::base,
     gl_lib::text_rendering::font,
-    gl_lib::{gl, na, BoxCoords, ScreenCoords, ScreenBox}
+    gl_lib::{gl, na, BoxCoords, ScreenBox}
 };
 
 use failure;
@@ -47,8 +47,10 @@ fn main() -> Result<(), failure::Error> {
 
 fn setup_gui(gl: &gl::Gl) -> gls::components::container::ComponentContainer<u32> {
     let mut container = gls::components::container::ComponentContainer::new();
-
-    container.add_component(base::button(gl), button_handler);
+    let mut btn = base::button(gl);
+    btn.base.set_width(200.0, 800.0);
+    btn.base.set_height(200.0, 600.0);
+    container.add_component(btn, button_handler);
     container
 }
 
