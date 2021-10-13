@@ -8,35 +8,35 @@ use super::*;
 
 pub struct Row<T> {
     children: Vec::<Box<dyn Element<T>>>,
-    size: Size
+    attributes: Attributes
 }
 
 
 
 impl<T> Row<T> {
 
-    pub fn new(size: Size) -> Self {
+    pub fn new() -> Self {
 
         Row {
             children: Vec::new(),
-            size
+            attributes: Default::default(),
         }
     }
 
     pub fn add(&mut self, el: Box<dyn Element<T>>) {
         self.children.push(el);
     }
-
-
-
-
 }
 
 
 impl<T> Element<T> for Row<T> {
 
-    fn size(&self) -> Size {
-        self.size
+    fn attributes(&self) -> &Attributes {
+        &self.attributes
+    }
+
+    fn attributes_mut(&mut self) -> &mut Attributes {
+        &mut self.attributes
     }
 
     fn add_to_container(&self, container: &mut ComponentContainer<T>, available_space: &RealizedSize) {
@@ -46,7 +46,7 @@ impl<T> Element<T> for Row<T> {
         let mut abs_width = 0.;
         let mut fill_count = 0;
         for c in &self.children {
-            match c.size().width {
+            match c.attributes().size.width {
                 No(l) => {
                     match l {
                         Px(px) => { abs_width += px; },
@@ -60,70 +60,23 @@ impl<T> Element<T> for Row<T> {
         }
 
 
-        let mut next_x = available_space.x;
-        println!("Row abs {:?}, fill count: {}", abs_width, fill_count);
-        for c in &self.children {
-            let mut child_space = *available_space;
-            child_space.width /= 2.0;
-            child_space.x = next_x;
-            next_x += child_space.width;
-            c.add_to_container(container, &child_space);
+        if self.children.len() == 0 {
+            return;
         }
 
+        let attributes = self.attributes();
+        let mut next_x = available_space.x + attributes.padding.left;
 
-        /*
-
-        // dependent on the
-        // TODO: Make this live on Element and not row
-        let final_width = match self.size().width {
-        LengthAttrib::No(l) =>
-        match l {
-        Length::Px(px) => px,
-        Length::Fill => {},
-        _ => unimplemented!(),
-
-    },
-        LengthAttrib::Max(l) => {
-
-        let r : u32 = match l {
-        Length::Px(px) => px.min(available_space.width),
-        _ => unimplemented!(),
-    };
-        r
-    },
-        _ => unimplemented!(),
+        let content_width = available_space.width - attributes.padding.left - attributes.padding.right - attributes.spacing.x * (self.children.len() - 1) as f32;
+        let content_height = available_space.height - attributes.padding.bottom - attributes.padding.top;
 
 
-    };
-
-         */
-
+        for c in &self.children {
+            let mut child_space = *available_space;
+            child_space.width = content_width/ 2.0;
+            child_space.x = next_x;
+            next_x += child_space.width + attributes.spacing.x;
+            c.add_to_container(container, &child_space);
+        }
     }
-
 }
-
-/*
-fn get_length() -> Length {
-
-let final_width = match self.size().width {
-LengthAttrib::No(l) =>
-match l {
-Length::Px(px) => px,
-Length::Fill => {},
-_ => unimplemented!(),
-
-},
-    LengthAttrib::Max(l) => {
-
-    let r : u32 = match l {
-    Length::Px(px) => px.min(available_space.width),
-    _ => unimplemented!(),
-};
-    r
-},
-    _ => unimplemented!(),
-
-
-}
-}
-     */

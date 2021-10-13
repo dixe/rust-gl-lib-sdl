@@ -12,13 +12,25 @@ Along with a max and or min, These max and min should also be specified by on of
 
  */
 
-#[derive(Debug,Clone,Copy)]
+
+
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Attributes {
+    pub size: Size,
+    pub align: Align,
+    pub padding: Padding,
+    pub spacing: Spacing,
+}
+
+
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Size {
     pub width: LengthAttrib,
     pub height: LengthAttrib
 }
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum LengthAttrib {
     No(Length),
     Max(Length),
@@ -26,7 +38,13 @@ pub enum LengthAttrib {
     MinMax(Length, Length)
 }
 
-#[derive(Debug,Clone,Copy)]
+impl Default for LengthAttrib {
+    fn default() -> Self {
+        LengthAttrib::No(Default::default())
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub enum Length {
     /// Length equal to given number of pixels
     Px(f32),
@@ -45,17 +63,57 @@ pub enum Length {
     FitContent
 }
 
-
-
-pub struct Attributes {
-    width: LengthAttrib,
-    height: LengthAttrib,
-    align: Alignment,
+impl Default for Length {
+    fn default() -> Self {
+        Length::Fill
+    }
 }
 
 
+
+/// Attributes can be used to specify how an element renders
+#[derive(Debug,Clone,Copy)]
+pub enum Attribute {
+    Width(LengthAttrib),
+    Height(LengthAttrib),
+    Padding(f32),
+    PaddingXY(f32,f32),
+    PaddingEach(Padding),
+    Spacing(f32),
+    SpacingXY(f32, f32),
+
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Align {
+    pub x: Alignment,
+    pub y: Alignment,
+}
+
+#[derive(Debug,Clone,Copy)]
 pub enum Alignment {
     Left,
     Right,
     Center
+}
+
+impl Default for Alignment {
+    fn default() -> Self {
+        Alignment::Center
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Padding {
+    pub left: f32,
+    pub right: f32,
+    pub top: f32,
+    pub bottom: f32,
+}
+
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Spacing {
+    pub x: f32,
+    pub y: f32,
 }

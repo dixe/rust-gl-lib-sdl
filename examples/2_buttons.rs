@@ -62,16 +62,24 @@ fn setup_gui(gl: &gl::Gl, width: f32, height: f32) -> gls::components::container
 
 
 
-    let mut root_row = Row::new(Size { width: LengthAttrib::No(Length::Fill), height: LengthAttrib::Max(Length::Px(100.0)) });
+    let mut root_row = Row::new();
 
+
+    root_row.add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)));
+    root_row.add_attribute(Attribute::Height(LengthAttrib::No(Length::Px(100.))));
+
+    root_row.add_attribute(Attribute::Padding(10.0));
+
+    root_row.add_attribute(Attribute::Spacing(20.0));
 
     let mut btn = base::button(gl);
 
     btn.update_content("Add".to_string());
-    let btn_elm = ComponentElement::new(btn, button_handler_1, Size {
-        width: LengthAttrib::No(Length::Fill),
-        height: LengthAttrib::No(Length::Px(50.)),
-    });
+
+    let mut btn_elm = ComponentElement::new(btn, button_handler_1);
+
+    btn_elm.add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)));
+    btn_elm.add_attribute(Attribute::Height(LengthAttrib::No(Length::Px(50.))));
 
     root_row.add(Box::new(btn_elm));
 
@@ -79,10 +87,11 @@ fn setup_gui(gl: &gl::Gl, width: f32, height: f32) -> gls::components::container
     let mut btn2 = base::button(gl);
     btn2.update_content("Sub".to_string());
 
-    let btn_elm_2 = ComponentElement::new(btn2, button_handler_2, Size {
-        width: LengthAttrib::No(Length::Fill),
-        height: LengthAttrib::No(Length::Px(50.)),
-    });
+    let mut btn_elm_2 = ComponentElement::new(btn2, button_handler_2);
+
+    btn_elm_2.add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)));
+    btn_elm_2.add_attribute(Attribute::Height(LengthAttrib::No(Length::Px(50.))));
+
 
 
 
