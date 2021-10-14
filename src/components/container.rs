@@ -111,7 +111,7 @@ fn hover_no_match(key: usize, component: &Component, component_events: &mut Comp
 
 type NoMatchFn = fn (key: usize, component: &Component, component_events: &mut ComponentEvents);
 
-fn push_component_event<T>(event: ComponentEvent, event_x: f32, event_y: f32, components: &Components<T>, component_events: &mut ComponentEvents, noMatch: Option<NoMatchFn>) -> HandleRes {
+fn push_component_event<T>(event: ComponentEvent, event_x: f32, event_y: f32, components: &Components<T>, component_events: &mut ComponentEvents, no_match: Option<NoMatchFn>) -> HandleRes {
 
     let mut res = HandleRes::Unused;
     // TODO: Make this into a functions that takes the event to push
@@ -128,8 +128,8 @@ fn push_component_event<T>(event: ComponentEvent, event_x: f32, event_y: f32, co
 
             },
             OnTop::No => {
-                if let Some(noMatchFn) = noMatch {
-                    noMatchFn(*key, comp,  component_events);
+                if let Some(no_match_fn) = no_match {
+                    no_match_fn(*key, comp,  component_events);
                 }
             }
         }

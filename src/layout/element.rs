@@ -89,6 +89,7 @@ impl<T> Element<T> for ComponentElement<T> {
 
 
         new_comp.base.coords.x = available_space.x;
+        new_comp.base.coords.y = available_space.y;
 
         let attributes = self.attributes();
         match attributes.size.width {
@@ -103,7 +104,7 @@ impl<T> Element<T> for ComponentElement<T> {
                 },
             LengthAttrib::Max(l) => {
                 match l {
-                    Length::Px(px) =>{panic!() },
+                    Length::Px(_px) =>{ unimplemented!() },
                     _ => unimplemented!(),
                 }
             },
@@ -122,7 +123,7 @@ impl<T> Element<T> for ComponentElement<T> {
                 },
             LengthAttrib::Max(l) => {
                 match l {
-                    Length::Px(px) =>{panic!()},
+                    Length::Px(_px) =>{ unimplemented!() },
                     _ => unimplemented!(),
                 }
             },

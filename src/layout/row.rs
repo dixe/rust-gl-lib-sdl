@@ -1,8 +1,5 @@
-use crate::components::base::*;
 use crate::components::container::*;
 use crate::layout::attributes::{*, Length::*, LengthAttrib::*};
-use gl_lib::text_rendering::{text_renderer::TextRenderer};
-use gl_lib::{gl, objects::square, shader, ScreenBox};
 use crate::layout::element::*;
 use super::*;
 
@@ -74,8 +71,11 @@ impl<T> Element<T> for Row<T> {
         for c in &self.children {
             let mut child_space = *available_space;
             child_space.width = content_width/ 2.0;
+            child_space.height = content_height;
             child_space.x = next_x;
+            child_space.y = available_space.y + attributes.padding.top;
             next_x += child_space.width + attributes.spacing.x;
+
             c.add_to_container(container, &child_space);
         }
     }

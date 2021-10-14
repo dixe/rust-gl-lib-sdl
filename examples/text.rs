@@ -35,8 +35,8 @@ fn main() -> Result<(), failure::Error> {
 
 
         let time_ms =  1.0 / window.deltatime();
-        window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), fps_coords, Some(sb), 1.0);
-        window.text_renderer().render_text(&gl, &TEST_TEXT, text_coords, Some(sb), 1.0);
+        window.text_renderer().render_text_with_box(&gl, &format!("Fps = {}", time_ms), fps_coords, Some(sb), 1.0);
+        window.text_renderer().render_text_with_box(&gl, &TEST_TEXT, text_coords, Some(sb), 1.0);
 
 
         window.update::<()>(None);

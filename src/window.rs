@@ -1,4 +1,4 @@
-use gl_lib::{self, na, gl, gl::viewport, ScreenBox, objects::square};
+use gl_lib::{self, na, gl, gl::viewport, objects::square};
 use gl_lib::text_rendering::{text_renderer, font};
 use failure;
 use deltatime;

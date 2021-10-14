@@ -2,7 +2,7 @@ use gl_lib_sdl as gls;
 use gl_lib_sdl::{
     components::base,
     gl_lib::text_rendering::font,
-    gl_lib::{gl, na, BoxCoords, ScreenBox}
+    gl_lib::{gl, na}
 };
 
 use failure;
@@ -27,15 +27,13 @@ fn main() -> Result<(), failure::Error> {
     let mut state = 1;
 
 
-    let sb:ScreenBox = Default::default();
-    let text_coords = BoxCoords {x:0.5, y:0.5};
-
     while !window.should_quit() {
 
+        /*
         window
-            .text_renderer()
-            .render_text(&gl, &format!("State = {}", state), text_coords, Some(sb), 1.0);
-
+        .text_renderer()
+        .render_text_with_box(&gl, &format!("State = {}", state), text_coords, Some(sb), 1.0);
+         */
 
         window.update(Some((&mut container, &mut state)));
 

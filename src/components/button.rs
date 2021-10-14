@@ -1,6 +1,6 @@
 pub use crate::components::base::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
-use gl_lib::{gl, na, shader::Shader, objects::square, BoxCoords, ScreenBox};
+use gl_lib::{gl, shader::Shader, objects::square, ScreenBox};
 
 #[derive(Debug,Clone)]
 pub struct Button {
@@ -31,15 +31,13 @@ impl Button {
 
         let hover = if base.hover { 0.6 } else { 1.0 };
 
-        let c = ComponentBase::window_to_screen_coords( (base.coords.x + base.width) / 2.0, (base.coords.y + base.height) / 2.0, screen_w, screen_h);
-
         self.shader.set_mat4(gl, "transform", transform);
 
         self.shader.set_f32(gl, "hover", hover);
 
-        self.shader.set_f32(gl, "h_half", (base.height / screen_h));
+        self.shader.set_f32(gl, "h_half", base.height / screen_h);
 
-        self.shader.set_f32(gl, "w_half", (base.width / screen_w));
+        self.shader.set_f32(gl, "w_half", base.width / screen_w);
 
         render_square.render(&gl);
 
@@ -47,8 +45,7 @@ impl Button {
         let button_screen_box = ScreenBox::new(base.coords.x, base.coords.y, base.width, base.height, screen_w, screen_h);
 
 
-        let coords = BoxCoords {x: 0.0, y: 0.0};
-        tr.render_text(gl, &self.content, coords, Some(button_screen_box), 1.0 );
+        tr.render_text(gl, &self.content, Default::default(), Some(button_screen_box), 1.0);
     }
 }
 

@@ -2,7 +2,7 @@ use gl_lib_sdl as gls;
 use gl_lib_sdl::{
     components::base,
     gl_lib::text_rendering::font,
-    gl_lib::{gl, na, BoxCoords, ScreenCoords, ScreenBox}
+    gl_lib::{gl, na},
 };
 
 use failure;
@@ -27,16 +27,11 @@ fn main() -> Result<(), failure::Error> {
 
     let mut state: i32 = 1;
 
-
-    let sb:ScreenBox = Default::default();
-    let text_coords = BoxCoords {x:0.5, y:0.5};
-
     while !window.should_quit() {
 
         window
             .text_renderer()
-            .render_text(&gl, &format!("State = {}", state), text_coords, Some(sb), 1.0);
-
+            .render_text(&gl, &format!("State = {}", state), Default::default(), None, 1.0);
 
         window.update(Some((&mut container, &mut state)));
 
@@ -105,7 +100,7 @@ fn setup_gui(gl: &gl::Gl, width: f32, height: f32) -> gls::components::container
 }
 
 
-fn button_handler_1(event: gls::components::base::ComponentEvent, comp: &mut gls::components::base::Component, state: &mut i32) {
+fn button_handler_1(event: gls::components::base::ComponentEvent, _comp: &mut gls::components::base::Component, state: &mut i32) {
     use gls::components::base::ComponentEvent;
 
     match event {
@@ -118,7 +113,7 @@ fn button_handler_1(event: gls::components::base::ComponentEvent, comp: &mut gls
 }
 
 
-fn button_handler_2(event: gls::components::base::ComponentEvent, comp: &mut gls::components::base::Component, state: &mut i32) {
+fn button_handler_2(event: gls::components::base::ComponentEvent, _comp: &mut gls::components::base::Component, state: &mut i32) {
     use gls::components::base::ComponentEvent;
 
 

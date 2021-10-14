@@ -1,5 +1,5 @@
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
-use gl_lib::{gl, na, na::Translation3, objects::square, ScreenCoords, ScreenBox };
+use gl_lib::{gl, na, na::Translation3, objects::square, ScreenCoords };
 use crate::components::button::Button;
 
 
