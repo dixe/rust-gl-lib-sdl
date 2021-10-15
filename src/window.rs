@@ -2,8 +2,28 @@ use gl_lib::{self, na, gl, gl::viewport, objects::square};
 use gl_lib::text_rendering::{text_renderer, font};
 use failure;
 use deltatime;
+use sdl2;
 use crate::components::container::ComponentContainer;
 
+
+/// Struct given to component handlers to change things about the window.
+pub struct WindowComponentAccess {
+    video_subsystem: sdl2::VideoSubsystem,
+}
+
+impl WindowComponentAccess {
+
+    /// Set the vsyn interval, see https://docs.rs/sdl2/0.34.5/sdl2/struct.VideoSubsystem.html#method.gl_set_swap_interval for more info on parameters
+    /// Disable B vsync by calling with 0
+    pub fn set_swap_interval<S: Into<sdl2::video::SwapInterval>>(& self, interval: S) {
+        self.video_subsystem.gl_set_swap_interval(0);
+    }
+
+
+    pub fn enable_vsync(&self) {
+        self.video_subsystem.gl_set_swap_interval(sdl2::video::SwapInterval::VSync);
+    }
+}
 
 pub struct SdlGlWindow {
     sdl: sdl2::Sdl,
@@ -16,7 +36,8 @@ pub struct SdlGlWindow {
     quit: bool,
     event_handler: Box<dyn Fn(sdl2::event::Event)>,
     text_renderer: text_renderer::TextRenderer,
-    render_square: square::Square
+    render_square: square::Square,
+    window_component_access: WindowComponentAccess
 }
 
 
@@ -70,7 +91,10 @@ impl SdlGlWindow {
             quit: false,
             event_handler,
             text_renderer,
-            render_square
+            render_square,
+            window_component_access: WindowComponentAccess {
+                video_subsystem
+            },
         })
 
     }
@@ -94,6 +118,10 @@ impl SdlGlWindow {
     }
 
 
+
+    pub fn window_access(&self) -> &WindowComponentAccess {
+        &self.window_component_access
+    }
 
     /// Render components, Swap gl window, update internal delta time and handle sdl_events.
     /// Finish with clearing color_buffer_bit and depth_buffer_bit
@@ -162,9 +190,9 @@ impl SdlGlWindow {
 
 
             if let Some(ref mut cont) = container {
-                cont.0.handle_sdl_event(event.clone(), cont.1);
+                cont.0.handle_sdl_event(event.clone(), cont.1, &self.window_component_access);
             }
-            // TODO: Consider passing events consummed by components
+
             (self.event_handler)(event);
         }
     }

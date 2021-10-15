@@ -41,11 +41,10 @@ impl Button {
 
         render_square.render(&gl);
 
-
         let button_screen_box = ScreenBox::new(base.coords.x, base.coords.y, base.width, base.height, screen_w, screen_h);
 
+        tr.render_text(gl, &self.content, Default::default(), button_screen_box, 1.0);
 
-        tr.render_text(gl, &self.content, Default::default(), Some(button_screen_box), 1.0);
     }
 }
 

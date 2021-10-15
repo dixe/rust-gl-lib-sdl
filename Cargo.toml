@@ -7,7 +7,7 @@ edition = "2018"
 
 [dependencies]
 # gl_lib = { git = "https://github.com/dixe/rust-gl-lib" }
- gl_lib = { path = "../rust-gl-lib" }
+gl_lib = { path = "../rust-gl-lib" }
 deltatime = { git = "https://github.com/dixe/rust-deltatime" }
 failure = "0.1"
 

@@ -15,6 +15,8 @@ fn main() -> Result<(), failure::Error> {
     let mut window = gls::window::SdlGlWindow::new("Text window", width, height, font).unwrap();
 
 
+    window.window_access().set_swap_interval(0);
+
     let gl = &window.gl().clone();
 
 
@@ -22,10 +24,12 @@ fn main() -> Result<(), failure::Error> {
 
     window.setup_blend();
 
+    let mut fps_sb = ScreenBox::full_screen(width as f32, height as f32);
+    let mut text_sb = ScreenBox::full_screen(width as f32, height as f32);
 
-    let sb:ScreenBox = Default::default();
-    let fps_coords = BoxCoords {x: 0.0, y: 0.0};
-    let text_coords = BoxCoords {x: 0.0, y: 0.05};
+
+    fps_sb.height = 50.0;
+    text_sb.y = 50.0;
 
     loop {
 
@@ -35,14 +39,15 @@ fn main() -> Result<(), failure::Error> {
 
 
         let time_ms =  1.0 / window.deltatime();
-        window.text_renderer().render_text_with_box(&gl, &format!("Fps = {}", time_ms), fps_coords, Some(sb), 1.0);
-        window.text_renderer().render_text_with_box(&gl, &TEST_TEXT, text_coords, Some(sb), 1.0);
+
+
+        window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), Default::default(), fps_sb, 1.0);
+        window.text_renderer().render_text(&gl, &TEST_TEXT, Default::default(), text_sb, 1.0);
 
 
         window.update::<()>(None);
 
     }
-
 }
 
 

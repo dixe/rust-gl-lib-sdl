@@ -5,6 +5,7 @@ use gl_lib_sdl::{
     gl_lib::{gl, na, ScreenBox}
 };
 
+
 use failure;
 use std::path::Path;
 
@@ -24,23 +25,26 @@ fn main() -> Result<(), failure::Error> {
 
     let mut container = setup_gui(&gl);
 
-    let mut state = 1;
+    let mut state = true;
 
     let sb = ScreenBox::full_screen(width as f32, height as f32);
 
     while !window.should_quit() {
-        window
-            .text_renderer()
-            .render_text(&gl, &format!("State = {}", state), Default::default(), sb, 1.0);
+
+        let time_ms =  1.0 / window.deltatime();
+        window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), Default::default(), sb, 1.0);
+
         window.update(Some((&mut container, &mut state)));
     }
 
     Ok(())
 }
 
-fn setup_gui(gl: &gl::Gl) -> gls::components::container::ComponentContainer<u32> {
+fn setup_gui(gl: &gl::Gl) -> gls::components::container::ComponentContainer<bool> {
     let mut container = gls::components::container::ComponentContainer::new();
     let mut btn = base::button(gl);
+
+    btn.update_content("Toogle".to_string());
     btn.base.set_width(200.0, 800.0);
     btn.base.set_height(200.0, 600.0);
     container.add_component(btn, button_handler);
@@ -50,14 +54,23 @@ fn setup_gui(gl: &gl::Gl) -> gls::components::container::ComponentContainer<u32>
 fn button_handler(
     event: gls::components::base::ComponentEvent,
     comp: &mut gls::components::base::Component,
-    state: &mut u32,
+    state: &mut bool,
     window_access: &gls::window::WindowComponentAccess,
 ) {
     use gls::components::base::ComponentEvent;
     match event {
         ComponentEvent::Clicked => {
-            *state += 1;
-            comp.update_content(format!("Btn state {}", state));
+            *state = !*state;
+            println!("{:?}", state);
+            match state {
+                false => {
+                    window_access.set_swap_interval(0);
+                },
+                true => {
+                    window_access.enable_vsync();
+                }
+            }
+
         }
         _ => {}
     }

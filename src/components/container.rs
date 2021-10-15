@@ -1,4 +1,5 @@
 use crate::components::base::{OnTop, Component, ComponentEvent};
+use crate::window;
 
 
 pub enum HandleRes {
@@ -6,7 +7,7 @@ pub enum HandleRes {
     Unused
 }
 
-pub type Handler<T> = fn(ComponentEvent, &mut Component,  &mut T);
+pub type Handler<T> = fn(ComponentEvent, &mut Component,  &mut T, &window::WindowComponentAccess);
 type ComponentEvents = std::collections::VecDeque<InternalComponentEvent>;
 
 pub type Components<T> = std::collections::HashMap<usize, (Component, Handler<T>)>;
@@ -37,7 +38,7 @@ impl<T> ComponentContainer<T> {
     }
 
 
-    fn handle_events(&mut self, state: &mut T) {
+    fn handle_events(&mut self, state: &mut T, window_access: &window::WindowComponentAccess) {
 
         let mut popped_event = self.component_events.pop_front();
         while let Some(event) = popped_event {
@@ -57,7 +58,7 @@ impl<T> ComponentContainer<T> {
                     _ => {},
                 };
 
-                data.1(event.event, comp, state);
+                data.1(event.event, comp, state, window_access);
 
             }
 
@@ -66,7 +67,7 @@ impl<T> ComponentContainer<T> {
     }
 
 
-    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, state: &mut T ) -> HandleRes {
+    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, state: &mut T, window_access: &window::WindowComponentAccess) -> HandleRes {
         use sdl2::event::Event;
 
         let mut res = HandleRes::Unused;
@@ -86,15 +87,13 @@ impl<T> ComponentContainer<T> {
             },
             Event::MouseMotion{x, y, .. }  => {
                 res = push_component_event(ComponentEvent::Hover,  x as f32, y as f32, &self.components, &mut self.component_events, Some(hover_no_match));
-
-
             }
             _ => {}
 
         };
 
 
-        self.handle_events(state);
+        self.handle_events(state, window_access);
         res
     }
 }

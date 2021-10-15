@@ -22,8 +22,7 @@ fn main() -> Result<(), failure::Error> {
 
     window.setup_blend();
 
-    let sb:ScreenBox = Default::default();
-    let fps_coords = BoxCoords {x:0., y: 0.0};
+    let sb = ScreenBox::full_screen(width as f32, height as f32);
 
     loop {
 
@@ -33,7 +32,7 @@ fn main() -> Result<(), failure::Error> {
 
 
         let time_ms =  1.0 / window.deltatime();
-        window.text_renderer().render_text_with_box(&gl, &format!("Fps = {}", time_ms), fps_coords, Some(sb), 1.0);
+        window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), Default::default(), sb, 1.0);
 
         window.update::<()>(None);
 

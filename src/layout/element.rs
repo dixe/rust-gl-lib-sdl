@@ -132,5 +132,4 @@ impl<T> Element<T> for ComponentElement<T> {
 
         container.add_component(new_comp,  self.handler);
     }
-
 }

@@ -2,14 +2,14 @@ use gl_lib_sdl as gls;
 use gl_lib_sdl::{
     components::base,
     gl_lib::text_rendering::font,
-    gl_lib::{gl, na},
+    gl_lib::{gl, na, ScreenBox},
 };
 
 use failure;
 use std::path::Path;
 
 fn main() -> Result<(), failure::Error> {
-    let width = 800;
+    let width = 1000;
     let height = 600;
 
     let font_path = Path::new("./assets/fonts/Arial.fnt");
@@ -27,11 +27,13 @@ fn main() -> Result<(), failure::Error> {
 
     let mut state: i32 = 1;
 
+    let sb = ScreenBox::full_screen(width as f32, height as f32);
+
     while !window.should_quit() {
 
         window
             .text_renderer()
-            .render_text(&gl, &format!("State = {}", state), Default::default(), None, 1.0);
+            .render_text(&gl, &format!("State = {}", state), Default::default(), sb, 1.0);
 
         window.update(Some((&mut container, &mut state)));
 
@@ -100,7 +102,7 @@ fn setup_gui(gl: &gl::Gl, width: f32, height: f32) -> gls::components::container
 }
 
 
-fn button_handler_1(event: gls::components::base::ComponentEvent, _comp: &mut gls::components::base::Component, state: &mut i32) {
+fn button_handler_1(event: gls::components::base::ComponentEvent, _comp: &mut gls::components::base::Component, state: &mut i32, window_access: &gls::window::WindowComponentAccess,) {
     use gls::components::base::ComponentEvent;
 
     match event {
@@ -113,7 +115,7 @@ fn button_handler_1(event: gls::components::base::ComponentEvent, _comp: &mut gl
 }
 
 
-fn button_handler_2(event: gls::components::base::ComponentEvent, _comp: &mut gls::components::base::Component, state: &mut i32) {
+fn button_handler_2(event: gls::components::base::ComponentEvent, _comp: &mut gls::components::base::Component, state: &mut i32, window_access: &gls::window::WindowComponentAccess,) {
     use gls::components::base::ComponentEvent;
 
 
