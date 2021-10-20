@@ -39,6 +39,8 @@ impl Button {
 
         self.shader.set_f32(gl, "w_half", base.width / screen_w);
 
+        self.shader.set_f32(gl, "radius", 0.1 / (f32::max(base.width / screen_w, base.height / screen_h)));
+
         render_square.render(&gl);
 
         let button_screen_box = ScreenBox::new(base.coords.x, base.coords.y, base.width, base.height, screen_w, screen_h);
@@ -84,6 +86,8 @@ out vec4 FragColor;
 uniform float w_half;
 uniform float h_half;
 
+uniform float radius;
+
 uniform float hover;
 
 float roundedRectangle(vec2 uv, vec2 size, float radius, float thickness)
@@ -111,10 +115,6 @@ void main()
 
     vec3 col = vec3(.8, 0.8, .8) * hover;
 
-
-
-
-    float radius = 0.4;
     // size = aspect - radius, 1.0 - radius
     vec2 size = vec2(aspect - radius, 1.0 - radius);
 

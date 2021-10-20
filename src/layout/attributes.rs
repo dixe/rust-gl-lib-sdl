@@ -6,9 +6,7 @@ We want to specify:
  * fit content
  * fill portion of available space
 
-
 Along with a max and or min, These max and min should also be specified by on of the above
-
 
  */
 
@@ -17,18 +15,13 @@ Along with a max and or min, These max and min should also be specified by on of
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Attributes {
-    pub size: Size,
+    pub width: LengthAttrib,
+    pub height: LengthAttrib,
     pub align: Align,
     pub padding: Padding,
-    pub spacing: Spacing,
+    pub spacing: Spacing
 }
 
-
-#[derive(Debug, Clone, Copy, Default)]
-pub struct Size {
-    pub width: LengthAttrib,
-    pub height: LengthAttrib
-}
 
 #[derive(Debug, Clone, Copy)]
 pub enum LengthAttrib {
@@ -65,7 +58,7 @@ pub enum Length {
 
 impl Default for Length {
     fn default() -> Self {
-        Length::Fill
+        Length::FitContent
     }
 }
 

@@ -1,7 +1,7 @@
 use super::*;
 use crate::components::base::*;
 use crate::components::container::*;
-use crate::layout::attributes::*;
+use crate::layout::attributes::{self, Length, Attributes, Attribute, LengthAttrib};
 
 pub trait Element<T> {
 
@@ -11,43 +11,71 @@ pub trait Element<T> {
 
     fn add_to_container(&self, container: &mut ComponentContainer<T>, available_space: &RealizedSize);
 
-    fn add_attribute(&mut self, attribute: Attribute) {
+    fn width(mut self, w: Length) -> Self where Self: Sized {
+        let mut cur = self.attributes_mut();
+        cur.width = LengthAttrib::No(w);
+        self
+    }
+
+    fn height(mut self, h: Length) -> Self where Self: Sized {
+        self.add_attribute(Attribute::Height(LengthAttrib::No(h)))
+    }
+
+    fn padding(mut self, p: f32) -> Self where Self: Sized {
+        self.add_attribute(Attribute::Padding(p))
+    }
+
+    fn add_attribute(mut self, attribute: Attribute) -> Self where Self: Sized {
         use Attribute::*;
 
         let mut cur = self.attributes_mut();
         match attribute {
             Width(la) => {
-                cur.size.width = la;
+                cur.width = la
             },
             Height(la) => {
-                cur.size.height = la;
+                cur.height = la
             },
             Padding(p) => {
-                cur.padding.top = p;
-                cur.padding.left = p;
-                cur.padding.right = p;
-                cur.padding.bottom = p;
+
+                let padding = attributes::Padding {
+                    left: p,
+                    right: p,
+                    top: p,
+                    bottom: p
+                };
+                cur.padding = padding
             }
             PaddingXY(x,y) => {
-                cur.padding.left = x;
-                cur.padding.right = x;
-                cur.padding.top = y;
-                cur.padding.bottom = y;
+                let padding = attributes::Padding {
+                    left: x,
+                    right: x,
+                    top: y,
+                    bottom: y,
+                };
+                cur.padding = padding
             },
             PaddingEach(padding) => {
                 cur.padding = padding
             },
+
             Spacing(s) => {
-                cur.spacing.x = s;
-                cur.spacing.y = s;
+                let spacing = attributes::Spacing {
+                    x: s,
+                    y: s
+                };
+                cur.spacing = spacing
             },
+
             SpacingXY(x, y) => {
-                cur.spacing.x = x;
-                cur.spacing.y = y;
-            }
-
+                let spacing = attributes::Spacing {
+                    x,
+                    y
+                };
+                cur.spacing = spacing
+            },
         };
-
+        self
     }
 }
 
@@ -92,7 +120,7 @@ impl<T> Element<T> for ComponentElement<T> {
         new_comp.base.coords.y = available_space.y;
 
         let attributes = self.attributes();
-        match attributes.size.width {
+        match attributes.width {
             LengthAttrib::No(l) =>
                 match l {
                     Length::Px(px) => {
@@ -111,7 +139,7 @@ impl<T> Element<T> for ComponentElement<T> {
             _ => unimplemented!(),
         };
 
-        match attributes.size.height {
+        match attributes.height {
             LengthAttrib::No(l) =>
                 match l {
                     Length::Px(px) => {

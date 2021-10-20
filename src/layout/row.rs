@@ -9,7 +9,6 @@ pub struct Row<T> {
 }
 
 
-
 impl<T> Row<T> {
 
     pub fn new() -> Self {
@@ -20,7 +19,7 @@ impl<T> Row<T> {
         }
     }
 
-    pub fn add(&mut self, el: Box<dyn Element<T>>) {
+    pub fn add(&mut self, mut el: Box<dyn Element<T>>) {
         self.children.push(el);
     }
 }
@@ -38,12 +37,11 @@ impl<T> Element<T> for Row<T> {
 
     fn add_to_container(&self, container: &mut ComponentContainer<T>, available_space: &RealizedSize) {
 
-
         // loop over children width and calc abos space used. That is px(u32) and FitContent
         let mut abs_width = 0.;
         let mut fill_count = 0;
         for c in &self.children {
-            match c.attributes().size.width {
+            match c.attributes().width {
                 No(l) => {
                     match l {
                         Px(px) => { abs_width += px; },
@@ -61,20 +59,24 @@ impl<T> Element<T> for Row<T> {
             return;
         }
 
-        let attributes = self.attributes();
-        let mut next_x = available_space.x + attributes.padding.left;
+        let mut attribs = self.attributes();
 
-        let content_width = available_space.width - attributes.padding.left - attributes.padding.right - attributes.spacing.x * (self.children.len() - 1) as f32;
-        let content_height = available_space.height - attributes.padding.bottom - attributes.padding.top;
+        let padding = attribs.padding;
+        let spacing = attribs.spacing;
+
+        let mut next_x = available_space.x + padding.left;
+
+        let content_width = available_space.width - padding.left - padding.right - spacing.x * (self.children.len() - 1) as f32;
+        let content_height = available_space.height - padding.bottom - padding.top;
 
 
         for c in &self.children {
             let mut child_space = *available_space;
-            child_space.width = content_width/ 2.0;
+            child_space.width = content_width/ self.children.len() as f32;
             child_space.height = content_height;
             child_space.x = next_x;
-            child_space.y = available_space.y + attributes.padding.top;
-            next_x += child_space.width + attributes.spacing.x;
+            child_space.y = available_space.y + padding.top;
+            next_x += child_space.width + spacing.x;
 
             c.add_to_container(container, &child_space);
         }
