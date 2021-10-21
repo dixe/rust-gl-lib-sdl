@@ -1,5 +1,5 @@
 pub mod base;
 
-mod button;
+pub mod button;
 
 pub mod container;

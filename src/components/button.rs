@@ -3,22 +3,23 @@ use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::{gl, shader::Shader, objects::square, ScreenBox};
 
 #[derive(Debug,Clone)]
-pub struct Button {
+pub struct Button<Message> {
     pub content: String, // Maybe use another compontent for content
     pub shader: Shader,
-    //pub square: square::Square
+    pub on_click_msg: Option<Message>
 }
 
 
-impl Button {
+impl<Message> Button<Message> where Message: Clone {
 
-    pub fn new(gl: &gl::Gl) -> Self {
+    pub fn new(gl: &gl::Gl, content: &str, msg: Option<Message>) -> Self {
 
         let shader = default_shader(gl).unwrap();
 
         Self {
-            content: "Test btn".to_string(),
+            content: content.to_string(),
             shader,
+            on_click_msg: msg
         }
     }
 
@@ -50,6 +51,16 @@ impl Button {
     }
 }
 
+impl<Message> From<Button<Message>> for Component<Message> where Message: Clone {
+
+    fn from(btn: Button<Message>) -> Self {
+        Self {
+            base: Default::default(),
+            comp_type: ComponentType::Btn(btn)
+        }
+    }
+
+}
 
 
 /// Creates a basic default shader that takes a mat4 transformation uniform transform

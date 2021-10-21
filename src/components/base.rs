@@ -1,6 +1,7 @@
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::{gl, na, na::Translation3, objects::square, ScreenCoords };
 use crate::components::button::Button;
+use std::fmt::Debug;
 
 
 #[derive(Debug,Clone,Copy)]
@@ -10,7 +11,6 @@ pub enum ComponentEvent {
     HoverEnd,
 }
 
-pub type EventHandler = Box<dyn Fn(ComponentEvent)>;
 
 pub type Level = u32;
 #[derive(Debug, Default,  Clone, Copy)]
@@ -114,19 +114,14 @@ pub enum OnTop {
 }
 
 
-#[derive(Debug,Clone)]
-pub struct Component {
+#[derive(Debug, Clone)]
+pub struct Component<Message> {
     pub base: ComponentBase,
-    comp_type: ComponentType
-}
-
-#[derive(Debug,Clone)]
-pub enum ComponentType {
-    Btn(Button)
+    pub comp_type: ComponentType<Message>,
 }
 
 
-impl Component {
+impl<Message> Component<Message> where Message : Clone {
     pub fn on_top(&self, x: f32, y: f32) -> OnTop {
 
         if x >= self.base.coords.x && x <= self.base.coords.x + self.base.width && y >= self.base.coords.y && y <= self.base.coords.y + self.base.height {
@@ -146,17 +141,29 @@ impl Component {
     pub fn update_content(&mut self, content: String) {
         match &mut self.comp_type {
             ComponentType::Btn(btn) => {
-                btn.content = content;
+                btn.content = content
             }
         }
     }
 
+    pub fn on_event(&self, event: ComponentEvent) -> Option<Message> {
+
+        match &self.comp_type {
+            ComponentType::Btn(btn) => {
+                match event {
+                    ComponentEvent::Clicked => {
+                        btn.on_click_msg.clone()
+                    },
+                    _ => None
+                }
+            }
+        }
+
+    }
+
 }
 
-pub fn button(gl: &gl::Gl) -> Component {
-
-    Component {
-        base: Default::default(),
-        comp_type: ComponentType::Btn(Button::new(gl))
-    }
+#[derive(Debug,Clone)]
+pub enum ComponentType<Message> {
+    Btn(Button<Message>)
 }

@@ -2,14 +2,22 @@ use super::*;
 use crate::components::base::*;
 use crate::components::container::*;
 use crate::layout::attributes::{self, Length, Attributes, Attribute, LengthAttrib};
+use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 
-pub trait Element<T> {
+
+pub trait Element<Message> {
 
     fn attributes(&self) -> &Attributes;
 
+
     fn attributes_mut(&mut self) -> &mut Attributes;
 
-    fn add_to_container(&self, container: &mut ComponentContainer<T>, available_space: &RealizedSize);
+
+    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer);
+
+
+    fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
+
 
     fn width(mut self, w: Length) -> Self where Self: Sized {
         let mut cur = self.attributes_mut();
@@ -24,6 +32,13 @@ pub trait Element<T> {
     fn padding(mut self, p: f32) -> Self where Self: Sized {
         self.add_attribute(Attribute::Padding(p))
     }
+
+
+
+    fn spacing(mut self, s: f32) -> Self where Self: Sized {
+        self.add_attribute(Attribute::Spacing(s))
+    }
+
 
     fn add_attribute(mut self, attribute: Attribute) -> Self where Self: Sized {
         use Attribute::*;
@@ -76,88 +91,5 @@ pub trait Element<T> {
             },
         };
         self
-    }
-}
-
-pub struct ComponentElement<T> {
-    comp: Component,
-    handler: Handler<T>,
-    attributes: Attributes
-}
-
-
-
-impl<T> ComponentElement<T> {
-    pub fn new(comp: Component, handler: Handler<T>) -> Self {
-        Self {
-            comp, handler, attributes: Default::default()
-        }
-    }
-}
-
-
-impl<T> Element<T> for ComponentElement<T> {
-
-
-    fn attributes(&self) -> &Attributes {
-        &self.attributes
-    }
-
-
-    fn attributes_mut(&mut self) -> &mut Attributes {
-        &mut self.attributes
-    }
-
-
-    fn add_to_container(&self, container: &mut ComponentContainer<T>, available_space: &RealizedSize) {
-
-        // Update out base component to have the correct size
-
-        let mut new_comp = self.comp.clone();
-
-
-        new_comp.base.coords.x = available_space.x;
-        new_comp.base.coords.y = available_space.y;
-
-        let attributes = self.attributes();
-        match attributes.width {
-            LengthAttrib::No(l) =>
-                match l {
-                    Length::Px(px) => {
-                        new_comp.base.set_width(px, available_space.width)
-                    },
-                    Length::Fill => {new_comp.base.set_width(available_space.width, available_space.width)},
-                    _ => unimplemented!(),
-
-                },
-            LengthAttrib::Max(l) => {
-                match l {
-                    Length::Px(_px) =>{ unimplemented!() },
-                    _ => unimplemented!(),
-                }
-            },
-            _ => unimplemented!(),
-        };
-
-        match attributes.height {
-            LengthAttrib::No(l) =>
-                match l {
-                    Length::Px(px) => {
-                        new_comp.base.set_height(px, available_space.height)
-                    },
-                    Length::Fill => {new_comp.base.set_height(available_space.height, available_space.height)},
-                    _ => unimplemented!(),
-
-                },
-            LengthAttrib::Max(l) => {
-                match l {
-                    Length::Px(_px) =>{ unimplemented!() },
-                    _ => unimplemented!(),
-                }
-            },
-            _ => unimplemented!(),
-        };
-
-        container.add_component(new_comp,  self.handler);
     }
 }

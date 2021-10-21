@@ -4,6 +4,8 @@ use failure;
 use deltatime;
 use sdl2;
 use crate::components::container::ComponentContainer;
+use crate::state::State;
+use crate::layout::RealizedSize;
 
 
 /// Struct given to component handlers to change things about the window.
@@ -25,7 +27,7 @@ impl WindowComponentAccess {
     }
 }
 
-pub struct SdlGlWindow {
+pub struct SdlGlWindow<Message> {
     sdl: sdl2::Sdl,
     gl: gl::Gl,
     window: sdl2::video::Window,
@@ -37,13 +39,17 @@ pub struct SdlGlWindow {
     event_handler: Box<dyn Fn(sdl2::event::Event)>,
     text_renderer: text_renderer::TextRenderer,
     render_square: square::Square,
-    window_component_access: WindowComponentAccess
+    window_component_access: WindowComponentAccess,
+    container: ComponentContainer<Message>,
+    container_dirty: bool
+
+
 }
 
 
 
 
-impl SdlGlWindow {
+impl<Message> SdlGlWindow<Message> where Message: Clone {
 
     pub fn new(window_text: &str, width: u32, height: u32, font: font::Font ) -> Result<Self, failure::Error> {
         let sdl = sdl2::init().unwrap();
@@ -95,6 +101,8 @@ impl SdlGlWindow {
             window_component_access: WindowComponentAccess {
                 video_subsystem
             },
+            container: ComponentContainer::new(),
+            container_dirty: true
         })
 
     }
@@ -125,16 +133,32 @@ impl SdlGlWindow {
 
     /// Render components, Swap gl window, update internal delta time and handle sdl_events.
     /// Finish with clearing color_buffer_bit and depth_buffer_bit
-    pub fn update<T>(&mut self, mut container: Option<(&mut ComponentContainer<T>, &mut T)>) {
+    pub fn update(&mut self, mut state: &mut State<Message>) {
 
-        if let Some(cont) = container.as_mut() {
-            self.render_components(cont.0);
+        if self.container_dirty {
 
-        };
+            let mut cont = ComponentContainer::new();
+            let size = (&self.viewport).into();
+            state.view(&self.gl).add_to_container(&mut cont, &size, &self.text_renderer);
+            self.container = cont;
+            self.container_dirty = false;
+        }
+
+
+        self.render_components();
 
         self.window.gl_swap_window();
         self.deltatime.update();
-        self.handle_events(container);
+        self.handle_events();
+
+        // handle state update
+
+        let mut popped_msg = self.container.messages.pop_front();
+        while let Some(msg) = popped_msg {
+            state.handle_message(&msg);
+            self.container_dirty = true;
+            popped_msg = self.container.messages.pop_front();
+        }
 
         unsafe {
             self
@@ -142,6 +166,7 @@ impl SdlGlWindow {
                 .Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         }
     }
+
 
     pub fn should_quit(&self) -> bool {
         self.quit
@@ -163,8 +188,8 @@ impl SdlGlWindow {
     }
 
 
-    fn render_components<T>(&mut self, container: &mut ComponentContainer<T>) {
-        for (comp, _) in container.components.values() {
+    fn render_components(&mut self) {
+        for comp in self.container.components.values() {
             comp.render(&self.gl, &mut self.text_renderer, &self.render_square, self.viewport.w as f32, self.viewport.h as f32);
         }
 
@@ -172,7 +197,7 @@ impl SdlGlWindow {
 
 
 
-    fn handle_events<T>(&mut self, mut container: Option<(&mut ComponentContainer<T>, &mut T)>) {
+    fn handle_events (&mut self) {
 
         use sdl2::event::Event;
         for event in self.event_pump.poll_iter() {
@@ -188,10 +213,7 @@ impl SdlGlWindow {
                 _ => {}
             };
 
-
-            if let Some(ref mut cont) = container {
-                cont.0.handle_sdl_event(event.clone(), cont.1, &self.window_component_access);
-            }
+            self.container.handle_sdl_event(event.clone(), &self.window_component_access);
 
             (self.event_handler)(event);
         }

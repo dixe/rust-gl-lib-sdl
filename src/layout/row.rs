@@ -2,14 +2,15 @@ use crate::components::container::*;
 use crate::layout::attributes::{*, Length::*, LengthAttrib::*};
 use crate::layout::element::*;
 use super::*;
+use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 
-pub struct Row<T> {
-    children: Vec::<Box<dyn Element<T>>>,
+pub struct Row<Message> {
+    children: Vec::<Box<dyn Element<Message>>>,
     attributes: Attributes
 }
 
 
-impl<T> Row<T> {
+impl<Message> Row<Message> {
 
     pub fn new() -> Self {
 
@@ -19,13 +20,14 @@ impl<T> Row<T> {
         }
     }
 
-    pub fn add(&mut self, mut el: Box<dyn Element<T>>) {
+    pub fn add(mut self, mut el: Box<dyn Element<Message>>) -> Self{
         self.children.push(el);
+        self
     }
 }
 
 
-impl<T> Element<T> for Row<T> {
+impl<Message> Element<Message> for Row<Message> {
 
     fn attributes(&self) -> &Attributes {
         &self.attributes
@@ -35,7 +37,18 @@ impl<T> Element<T> for Row<T> {
         &mut self.attributes
     }
 
-    fn add_to_container(&self, container: &mut ComponentContainer<T>, available_space: &RealizedSize) {
+    fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+
+        let mut abs_height = 0.;
+
+        for c in &self.children {
+            abs_height = f32::max(abs_height, c.final_height(available_space, text_renderer))
+        }
+
+        abs_height
+    }
+
+    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
 
         // loop over children width and calc abos space used. That is px(u32) and FitContent
         let mut abs_width = 0.;
@@ -78,7 +91,7 @@ impl<T> Element<T> for Row<T> {
             child_space.y = available_space.y + padding.top;
             next_x += child_space.width + spacing.x;
 
-            c.add_to_container(container, &child_space);
+            c.add_to_container(container, &child_space, text_renderer);
         }
     }
 }

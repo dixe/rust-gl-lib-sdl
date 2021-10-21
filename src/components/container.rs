@@ -7,19 +7,19 @@ pub enum HandleRes {
     Unused
 }
 
-pub type Handler<T> = fn(ComponentEvent, &mut Component,  &mut T, &window::WindowComponentAccess);
 type ComponentEvents = std::collections::VecDeque<InternalComponentEvent>;
 
-pub type Components<T> = std::collections::HashMap<usize, (Component, Handler<T>)>;
+pub type Components<Message> = std::collections::HashMap<usize, Component<Message>>;
 
-pub struct ComponentContainer<T> {
+pub struct ComponentContainer<Message> {
     next_id: usize,
-    pub components: Components<T>,
+    pub components: Components<Message>,
     component_events: ComponentEvents,
+    pub messages: std::collections::VecDeque<Message>,
 }
 
 
-impl<T> ComponentContainer<T> {
+impl<Message> ComponentContainer<Message> where Message: Clone {
 
     pub fn new() -> Self {
 
@@ -27,27 +27,26 @@ impl<T> ComponentContainer<T> {
             next_id: 1,
             components: std::collections::HashMap::new(),
             component_events: std::collections::VecDeque::new(),
+            messages: std::collections::VecDeque::new(),
         }
     }
 
-    pub fn add_component(&mut self, component: Component, handler: Handler<T>)  -> usize {
+    pub fn add_component(&mut self, component: Component<Message> )  -> usize {
         let id = self.next_id;
-        self.components.insert(id, (component, handler));
+        self.components.insert(id, component);
         self.next_id += 1;
         id
     }
 
 
-    fn handle_events(&mut self, state: &mut T, window_access: &window::WindowComponentAccess) {
+    fn handle_events(&mut self, window_access: &window::WindowComponentAccess) {
 
         let mut popped_event = self.component_events.pop_front();
         while let Some(event) = popped_event {
             let c = self.components.get_mut(&event.id);
 
 
-            if let Some(data) = c {
-                let comp = &mut data.0;
-
+            if let Some(mut comp) = c {
                 let _ = match event.event {
                     ComponentEvent::Hover => {
                         comp.base.hover = true;
@@ -58,8 +57,9 @@ impl<T> ComponentContainer<T> {
                     _ => {},
                 };
 
-                data.1(event.event, comp, state, window_access);
-
+                if let Some(msg) = comp.on_event(event.event) {
+                    self.messages.push_back(msg.clone());
+                }
             }
 
             popped_event = self.component_events.pop_front();
@@ -67,7 +67,7 @@ impl<T> ComponentContainer<T> {
     }
 
 
-    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, state: &mut T, window_access: &window::WindowComponentAccess) -> HandleRes {
+    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, window_access: &window::WindowComponentAccess) -> HandleRes {
         use sdl2::event::Event;
 
         let mut res = HandleRes::Unused;
@@ -86,19 +86,24 @@ impl<T> ComponentContainer<T> {
                 }
             },
             Event::MouseMotion{x, y, .. }  => {
-                res = push_component_event(ComponentEvent::Hover,  x as f32, y as f32, &self.components, &mut self.component_events, Some(hover_no_match));
+                res = push_component_event(ComponentEvent::Hover,
+                                           x as f32,
+                                           y as f32,
+                                           &self.components,
+                                           &mut self.component_events,
+                                           Some(hover_no_match));
             }
             _ => {}
 
         };
 
 
-        self.handle_events(state, window_access);
+        self.handle_events(window_access);
         res
     }
 }
 
-fn hover_no_match(key: usize, component: &Component, component_events: &mut ComponentEvents) {
+fn hover_no_match<Message>(key: usize, component: &Component<Message>, component_events: &mut ComponentEvents) {
 
     if component.base.hover {
         component_events.push_back(InternalComponentEvent{
@@ -108,18 +113,19 @@ fn hover_no_match(key: usize, component: &Component, component_events: &mut Comp
     }
 }
 
-type NoMatchFn = fn (key: usize, component: &Component, component_events: &mut ComponentEvents);
+type NoMatchFn<Message> = fn (key: usize, component: &Component<Message>, component_events: &mut ComponentEvents);
 
-fn push_component_event<T>(event: ComponentEvent, event_x: f32, event_y: f32, components: &Components<T>, component_events: &mut ComponentEvents, no_match: Option<NoMatchFn>) -> HandleRes {
+fn push_component_event<Message: Clone>(event: ComponentEvent, event_x: f32, event_y: f32, components: &Components<Message>, component_events: &mut ComponentEvents, no_match: Option<NoMatchFn<Message>>) -> HandleRes {
 
     let mut res = HandleRes::Unused;
     // TODO: Make this into a functions that takes the event to push
     // TODO: This is repeated and will get complicated
-    for (key, (comp, _)) in components {
+    for (key, comp) in components {
 
         match comp.on_top(event_x, event_y) {
             OnTop::OnTop(_level) => {
                 res = HandleRes::Consumed;
+
                 component_events.push_back(InternalComponentEvent{
                     id: *key,
                     event,
