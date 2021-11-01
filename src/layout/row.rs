@@ -2,15 +2,16 @@ use crate::components::container::*;
 use crate::layout::attributes::{*, Length::*, LengthAttrib::*};
 use crate::layout::element::*;
 use super::*;
+use crate::layout::node::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 
-pub struct Row<Message> {
-    children: Vec::<Box<dyn Element<Message>>>,
+pub struct Row<'a, Message> {
+    children: Vec::<Node<'a, Message>>,
     attributes: Attributes
 }
 
 
-impl<Message> Row<Message> {
+impl<'a, Message> Row<'a, Message> {
 
     pub fn new() -> Self {
 
@@ -20,14 +21,16 @@ impl<Message> Row<Message> {
         }
     }
 
-    pub fn add(mut self, mut el: Box<dyn Element<Message>>) -> Self{
-        self.children.push(el);
+    pub fn add<E>(mut self, el: E) -> Self
+    where
+        E: Into<Node<'a, Message>> {
+        self.children.push(el.into());
         self
     }
 }
 
 
-impl<Message> Element<Message> for Row<Message> {
+impl<'a, Message> Element<Message> for Row<'a, Message> {
 
     fn attributes(&self) -> &Attributes {
         &self.attributes
@@ -85,13 +88,27 @@ impl<Message> Element<Message> for Row<Message> {
 
         for c in &self.children {
             let mut child_space = *available_space;
-            child_space.width = content_width/ self.children.len() as f32;
+            child_space.width = content_width / self.children.len() as f32;
             child_space.height = content_height;
             child_space.x = next_x;
             child_space.y = available_space.y + padding.top;
             next_x += child_space.width + spacing.x;
 
             c.add_to_container(container, &child_space, text_renderer);
+        }
+    }
+}
+
+
+
+impl<'a, Message> From<Row<'a, Message>> for Node<'a, Message>
+where
+    Message: 'a {
+
+
+    fn from(row: Row<'a, Message>) -> Node<'a, Message> {
+        Node {
+            element: Box::new(row)
         }
     }
 }

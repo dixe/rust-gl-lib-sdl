@@ -24,18 +24,42 @@ fn main() -> Result<(), failure::Error> {
 
     let sb = ScreenBox::full_screen(width as f32, height as f32);
 
+    let mut state = State {};
+
     loop {
 
-        unsafe {
-            window.gl().Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-        }
-
-
         let time_ms =  1.0 / window.deltatime();
-        window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), Default::default(), sb, 1.0);
+        window.render_text(&format!("Fps = {}", time_ms));
 
-        window.update::<()>(None);
+        window.update(&mut state);
+    }
+}
 
+
+#[derive(Debug, Clone)]
+pub enum Message {
+}
+
+
+struct State {
+
+}
+
+impl gls::State<Message> for State {
+
+    fn handle_message(&mut self, message: &Message) {
     }
 
+
+    fn view(&self, gl: &gl::Gl) -> Box::<gls::layout::element::Element<Message>> {
+        use gls::layout::row::*;
+        use gls::layout::column::*;
+        use gls::layout::*;
+        use gls::layout::element::*;
+        use gls::layout::attributes::*;
+        use gls::layout::button::*;
+
+        Box::new(Column::new())
+
+    }
 }

@@ -6,6 +6,8 @@ use crate::layout::attributes::{self, Length, Attributes, Attribute, LengthAttri
 use crate::layout::element::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::gl;
+use crate::layout::node::*;
+
 
 #[derive(Clone, Debug)]
 pub struct Button<Message> {
@@ -116,4 +118,17 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
 
         container.add_component(new_comp.into());
     }
+}
+
+
+impl<'a, Message> From<Button<Message>> for Node<'a, Message>
+where
+    Message: Clone + 'a {
+
+    fn from(button: Button<Message>) -> Node<'a, Message> {
+        Node {
+            element: Box::new(button)
+        }
+    }
+
 }

@@ -1,12 +1,12 @@
 use gl_lib::{gl};
-use crate::layout::element::Element;
+use crate::layout::node::Node;
 
 
 pub trait State<Message> {
 
     fn handle_message(&mut self, message: &Message);
 
-    fn view(&self, gl: &gl::Gl) -> Box<Element<Message>>;
+    fn view(&self, gl: &gl::Gl) -> Node<Message>;
 
 
 }

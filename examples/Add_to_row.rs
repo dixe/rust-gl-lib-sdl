@@ -60,7 +60,7 @@ impl gls::State<Message> for World {
     }
 
 
-    fn view(&self, gl: &gl::Gl) -> Box::<gls::layout::element::Element<Message>> {
+    fn view(&self, gl: &gl::Gl) -> gls::layout::node::Node<Message> {
         use gls::layout::row::*;
         use gls::layout::column::*;
         use gls::layout::*;
@@ -68,28 +68,32 @@ impl gls::State<Message> for World {
         use gls::layout::attributes::*;
         use gls::layout::button::*;
 
-        Box::new(Column::new().width(Length::Fill)
-                 .padding(10.0)
-                 .spacing(10.0)
-                 .add(Box::new(Row::new()
-                               .width(Length::Fill)
-                               .add_attribute(Attribute::Spacing(20.0))
-                               .add(Box::new(
-                                   Button::new(gl, "Add", Some(Message::Add))
-                                       .add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)))
-                                       .add_attribute(Attribute::Height(LengthAttrib::No(Length::Px(50.))))))
-                               .add(Box::new(
-                                   Button::new(gl, "Sub", Some(Message::Sub))
-                                       .add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)))
-                                       .add_attribute(Attribute::Height(LengthAttrib::No(Length::Px(50.))))))))
-                 .add(Box::new(Button::new(gl, &format!("Total = {}", self.total), {
-                     if self.total < 3{
-                         None
-                     }
-                     else {
-                         Some(Message::Clear)
-                     }})
-                               .add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)))
-                               .add_attribute(Attribute::Height(LengthAttrib::No(Length::Fill))))))
+        let mut col = Column::new().width(Length::Fill)
+            .padding(10.0)
+            .spacing(10.0)
+            .add(Row::new()
+                 .width(Length::Fill)
+                 .add_attribute(Attribute::Spacing(20.0))
+                 .add( Button::new(gl, "Add", Some(Message::Add))
+                       .add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)))
+                       .add_attribute(Attribute::Height(LengthAttrib::No(Length::Px(50.)))))
+                 .add(Button::new(gl, "Sub", Some(Message::Sub))
+                      .add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)))
+                      .add_attribute(Attribute::Height(LengthAttrib::No(Length::Px(50.))))))
+            .add(Button::new(gl, "Sub2", Some(Message::Sub))
+                 .add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)))
+                 .add_attribute(Attribute::Height(LengthAttrib::No(Length::Px(50.)))))
+
+            .add(Button::new(gl, &format!("Total = {}", self.total), {
+                if self.total < 3{
+                    None
+                }
+                else {
+                    Some(Message::Clear)
+                }})
+                 .add_attribute(Attribute::Width(LengthAttrib::No(Length::Fill)))
+                 .add_attribute(Attribute::Height(LengthAttrib::No(Length::Fill))));
+
+        col.into()
     }
 }

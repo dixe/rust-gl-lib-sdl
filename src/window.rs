@@ -1,4 +1,4 @@
-use gl_lib::{self, na, gl, gl::viewport, objects::square};
+use gl_lib::{self, na, gl, gl::viewport, objects::square, ScreenBox};
 use gl_lib::text_rendering::{text_renderer, font};
 use failure;
 use deltatime;
@@ -6,6 +6,7 @@ use sdl2;
 use crate::components::container::ComponentContainer;
 use crate::state::State;
 use crate::layout::RealizedSize;
+use crate::layout::element::Element;
 
 
 /// Struct given to component handlers to change things about the window.
@@ -178,10 +179,12 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
         }
     }
 
-    pub fn text_renderer(&mut self) -> &mut text_renderer::TextRenderer {
-        &mut self.text_renderer
-    }
 
+    pub fn render_text(&mut self, text: &str) {
+        let sb = ScreenBox::full_screen(self.viewport.w as f32, self.viewport.h as f32);
+        self.text_renderer.render_text(&self.gl, text, Default::default(), sb, 1.0);
+
+    }
 
     pub fn setup_blend(&mut self) {
         self.text_renderer.setup_blend(&self.gl);
@@ -209,6 +212,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
                 } => {
                     self.viewport.update_size(w, h);
                     self.viewport.set_used(&self.gl);
+                    self.container_dirty = true;
                 },
                 _ => {}
             };

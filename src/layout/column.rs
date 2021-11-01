@@ -1,19 +1,18 @@
 use crate::components::container::*;
 use crate::layout::attributes::{*, Length::*, LengthAttrib::*};
 use crate::layout::element::*;
+use crate::layout::node::*;
 use super::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 
 
-pub struct Column<Message> {
-    children: Vec::<Box<dyn Element<Message>>>,
+pub struct Column<'a, Message> {
+    children: Vec::<Node<'a, Message>>,
     attributes: Attributes
 }
 
 
-
-
-impl<Message> Column<Message> {
+impl<'a, Message> Column<'a, Message> {
 
     pub fn new() -> Self {
 
@@ -23,14 +22,16 @@ impl<Message> Column<Message> {
         }
     }
 
-    pub fn add(mut self, mut el: Box<dyn Element<Message>>) -> Self {
-        self.children.push(el);
+    pub fn add<E>(mut self, el: E) -> Self
+    where
+        E: Into<Node<'a, Message>> {
+        self.children.push(el.into());
         self
     }
 }
 
 
-impl<Message> Element<Message> for Column<Message> {
+impl<'a, Message> Element<Message> for Column<'a, Message> {
 
     fn attributes(&self) -> &Attributes {
         &self.attributes
@@ -61,7 +62,7 @@ impl<Message> Element<Message> for Column<Message> {
                     match l {
                         Px(px) => { abs_height += px; },
                         FitContent => {
-
+                            abs_height += c.final_height(available_space, text_renderer);
                         },
                         _ => { fill_count += 1.0; }
 
@@ -83,16 +84,22 @@ impl<Message> Element<Message> for Column<Message> {
 
         let mut next_y = available_space.y + padding.top;
 
-        let content_height = available_space.width - padding.left - padding.right - spacing.x * (self.children.len() - 1) as f32;
+        let content_width = available_space.width - padding.left - padding.right - spacing.x * (self.children.len() - 1) as f32;
         let content_height = available_space.height - padding.bottom - padding.top;
 
 
-        let dynamic_height = f32::max(0.0, content_height - abs_height) - fill_count * spacing.y;
+        let dynamic_height = f32::max(0.0, content_height - abs_height) - self.children.len() as f32 * spacing.y;
 
+        println!("dh = {:?}", dynamic_height);
+
+        println!("abs_h = {:?}", abs_height);
+
+        println!("fc = {:?}", fill_count);
 
         for c in &self.children {
             let mut child_space = *available_space;
-            child_space.width = content_height;
+            child_space.width = content_width;
+            child_space.height = content_height;
 
             child_space.x = available_space.x + padding.left;
             child_space.y = next_y;
@@ -115,10 +122,21 @@ impl<Message> Element<Message> for Column<Message> {
                 _ => unimplemented!()
             }
 
-
             next_y += child_space.height + spacing.y;
 
             c.add_to_container(container, &child_space, text_renderer);
         }
     }
+}
+
+impl<'a, Message> From<Column<'a, Message>> for Node<'a, Message>
+where
+    Message: 'a {
+
+    fn from(column: Column<'a, Message>) -> Node<'a, Message> {
+        Node {
+            element: Box::new(column)
+        }
+    }
+
 }
