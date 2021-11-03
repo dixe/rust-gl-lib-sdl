@@ -14,6 +14,7 @@ pub struct Column<'a, Message> {
 
 impl<'a, Message> Column<'a, Message> {
 
+
     pub fn new() -> Self {
 
         Column {

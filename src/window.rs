@@ -5,7 +5,6 @@ use deltatime;
 use sdl2;
 use crate::components::container::ComponentContainer;
 use crate::state::State;
-use crate::layout::RealizedSize;
 use crate::layout::element::Element;
 
 
@@ -19,12 +18,12 @@ impl WindowComponentAccess {
     /// Set the vsyn interval, see https://docs.rs/sdl2/0.34.5/sdl2/struct.VideoSubsystem.html#method.gl_set_swap_interval for more info on parameters
     /// Disable B vsync by calling with 0
     pub fn set_swap_interval<S: Into<sdl2::video::SwapInterval>>(& self, interval: S) {
-        self.video_subsystem.gl_set_swap_interval(0);
+        self.video_subsystem.gl_set_swap_interval(interval.into()).unwrap();
     }
 
 
     pub fn enable_vsync(&self) {
-        self.video_subsystem.gl_set_swap_interval(sdl2::video::SwapInterval::VSync);
+        self.video_subsystem.gl_set_swap_interval(sdl2::video::SwapInterval::VSync).unwrap();
     }
 }
 
@@ -134,7 +133,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
 
     /// Render components, Swap gl window, update internal delta time and handle sdl_events.
     /// Finish with clearing color_buffer_bit and depth_buffer_bit
-    pub fn update(&mut self, mut state: &mut State<Message>) {
+    pub fn update(&mut self, state: &mut dyn State<Message>) {
 
         if self.container_dirty {
 

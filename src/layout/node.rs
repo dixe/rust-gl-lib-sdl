@@ -1,5 +1,5 @@
 use crate::components::container::*;
-use crate::layout::attributes::{*, Length::*, LengthAttrib::*};
+use crate::layout::attributes::Attributes;
 use crate::layout::element::*;
 use super::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };

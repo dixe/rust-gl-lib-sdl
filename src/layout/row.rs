@@ -13,13 +13,15 @@ pub struct Row<'a, Message> {
 
 impl<'a, Message> Row<'a, Message> {
 
-    pub fn new() -> Self {
 
-        Row {
+    pub fn new() -> Self {
+        Self {
             children: Vec::new(),
             attributes: Default::default(),
         }
     }
+
+
 
     pub fn add<E>(mut self, el: E) -> Self
     where
@@ -85,7 +87,7 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
             return;
         }
 
-        let mut attribs = self.attributes();
+        let attribs = self.attributes();
 
         let padding = attribs.padding;
         let spacing = attribs.spacing;

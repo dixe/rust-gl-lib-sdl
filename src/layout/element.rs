@@ -1,5 +1,4 @@
 use super::*;
-use crate::components::base::*;
 use crate::components::container::*;
 use crate::layout::attributes::{self, Length, Attributes, Attribute, LengthAttrib};
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
@@ -28,17 +27,17 @@ pub trait Element<Message> {
         self
     }
 
-    fn height(mut self, h: Length) -> Self where Self: Sized {
+    fn height(self, h: Length) -> Self where Self: Sized {
         self.add_attribute(Attribute::Height(LengthAttrib::No(h)))
     }
 
-    fn padding(mut self, p: f32) -> Self where Self: Sized {
+    fn padding(self, p: f32) -> Self where Self: Sized {
         self.add_attribute(Attribute::Padding(p))
     }
 
 
 
-    fn spacing(mut self, s: f32) -> Self where Self: Sized {
+    fn spacing(self, s: f32) -> Self where Self: Sized {
         self.add_attribute(Attribute::Spacing(s))
     }
 

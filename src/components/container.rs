@@ -39,7 +39,7 @@ impl<Message> ComponentContainer<Message> where Message: Clone {
     }
 
 
-    fn handle_events(&mut self, window_access: &window::WindowComponentAccess) {
+    fn handle_events(&mut self, _window_access: &window::WindowComponentAccess) {
 
         let mut popped_event = self.component_events.pop_front();
         while let Some(event) = popped_event {

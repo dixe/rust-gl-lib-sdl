@@ -2,7 +2,7 @@ use super::*;
 use crate::components::base::*;
 use crate::components::button as comp_btn;
 use crate::components::container::*;
-use crate::layout::attributes::{self, Length, Attributes, Attribute, LengthAttrib};
+use crate::layout::attributes::{Length, Attributes, LengthAttrib};
 use crate::layout::element::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::gl;
@@ -19,7 +19,7 @@ pub struct Button<Message> {
 impl<Message> Button<Message> where Message: Clone {
     pub fn new(gl: &gl::Gl, content: &str, msg: Option<Message>) -> Self {
 
-        let mut btn = comp_btn::Button::new(gl, content, msg.clone());
+        let btn = comp_btn::Button::new(gl, content, msg.clone());
 
         Self {
             btn,
@@ -32,11 +32,9 @@ impl<Message> Button<Message> where Message: Clone {
 
 impl<Message> Element<Message> for Button<Message> where Message: Clone {
 
-
     fn attributes(&self) -> &Attributes {
         &self.attributes
     }
-
 
     fn attributes_mut(&mut self) -> &mut Attributes {
         &mut self.attributes
@@ -96,7 +94,7 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
         w
     }
 
-    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
+    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, _text_renderer: &TextRenderer) {
 
         // Update out base component to have the correct size
 
