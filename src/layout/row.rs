@@ -51,6 +51,16 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
         abs_height
     }
 
+
+    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+        let mut abs_width = 0.;
+        for c in &self.children {
+            abs_width += c.final_width(available_space, text_renderer);
+        }
+
+        abs_width
+    }
+
     fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
 
         // loop over children width and calc abos space used. That is px(u32) and FitContent
@@ -82,16 +92,40 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
 
         let mut next_x = available_space.x + padding.left;
 
-        let content_width = available_space.width - padding.left - padding.right - spacing.x * (self.children.len() - 1) as f32;
+        let content_width = available_space.width - padding.left - padding.right;
         let content_height = available_space.height - padding.bottom - padding.top;
 
+        let dynamic_width = f32::max(0.0, content_width - abs_width) - (self.children.len() -1 ) as f32 * spacing.y;
 
         for c in &self.children {
             let mut child_space = *available_space;
-            child_space.width = content_width / self.children.len() as f32;
+            child_space.width = 0.0;
             child_space.height = content_height;
+
+
             child_space.x = next_x;
             child_space.y = available_space.y + padding.top;
+
+
+            match c.attributes().width {
+                No(l) => {
+                    match l {
+                        Px(px) => {
+                            child_space.width = px as f32;
+                        },
+                        FitContent => {
+                            child_space.width = c.final_width(available_space, text_renderer);
+                        },
+                        Fill => {
+                            child_space.width = dynamic_width / fill_count as f32 ;
+                        },
+                        _ => unimplemented!(),
+
+                    }
+                },
+                _ => unimplemented!()
+            }
+
             next_x += child_space.width + spacing.x;
 
             c.add_to_container(container, &child_space, text_renderer);

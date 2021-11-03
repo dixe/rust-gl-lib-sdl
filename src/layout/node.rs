@@ -29,4 +29,8 @@ impl<'a, Message> Element<Message> for Node<'a, Message> {
         self.element.final_height(available_space, text_renderer)
     }
 
+    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+        self.element.final_width(available_space, text_renderer)
+    }
+
 }

@@ -67,6 +67,35 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
         }
     }
 
+    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+
+        let w = match self.attributes().width {
+            LengthAttrib::No(l) =>
+                match l {
+                    Length::Px(px) => {
+                        px
+                    },
+                    Length::FitContent => {
+                        text_renderer.render_box(&self.btn.content, 1.0).pixel_w
+
+                    },
+                    _ => available_space.width,
+
+                },
+            LengthAttrib::Max(l) => {
+                match l {
+                    Length::Px(_px) =>{ unimplemented!() },
+                    _ => unimplemented!(),
+                }
+            },
+            _ => unimplemented!(),
+        };
+
+        println!("{:?}", w);
+
+        w
+    }
+
     fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
 
         // Update out base component to have the correct size

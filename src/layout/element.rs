@@ -19,6 +19,9 @@ pub trait Element<Message> {
     fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
 
 
+    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
+
+
     fn width(mut self, w: Length) -> Self where Self: Sized {
         let mut cur = self.attributes_mut();
         cur.width = LengthAttrib::No(w);
