@@ -3,9 +3,9 @@
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Attributes {
     pub width: Length,
-    pub width_contraint: LengthConstraint,
+    pub width_constraint: LengthConstraint,
     pub height: Length,
-    pub height_contraint: LengthConstraint,
+    pub height_constraint: LengthConstraint,
     pub align: Align,
     pub padding: Padding,
     pub spacing: Spacing
@@ -30,10 +30,10 @@ impl LengthConstraint {
         }
     }
 
-    pub fn min(&self, default: f32) -> f32 {
+    pub fn min(&self) -> f32 {
         match self {
-            LengthConstraint::Unbound => default,
-            LengthConstraint::Max(_) => default,
+            LengthConstraint::Unbound => 0.0,
+            LengthConstraint::Max(_) => 0.0,
             LengthConstraint::MinMax(min,_) => *min as f32,
             LengthConstraint::Min(min) => *min as f32
         }

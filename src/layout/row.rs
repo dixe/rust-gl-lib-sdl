@@ -40,7 +40,7 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
         &mut self.attributes
     }
 
-    fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+    fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
 
         let mut abs_height = 0.;
 
@@ -52,7 +52,7 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
     }
 
 
-    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+    fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         let mut abs_width = 0.;
         for c in &self.children {
             abs_width += c.final_width(available_space, text_renderer);
@@ -69,7 +69,7 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
         for c in &self.children {
             match c.attributes().width {
                 Px(px) => { abs_width += px as f32; },
-                FitContent => unimplemented!(),
+                FitContent => { abs_width += c.final_width(available_space, text_renderer); },
                 Fill => { fill_count += 1; }
                 FillPortion(x) => { fill_count += x; }
             }

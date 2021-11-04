@@ -14,12 +14,54 @@ pub trait Element<Message> {
 
     fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer);
 
+    fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
 
-    fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
+    fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+
+        let h = match self.attributes().height {
+            Length::Px(px) => {
+                px as f32
+            },
+            Length::FitContent => {
+                self.content_height(available_space, text_renderer)
+            },
+            _ => available_space.height,
+        };
 
 
-    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
 
+        let attribs = self.attributes();
+
+        let min = attribs.height_constraint.min();
+        let max = attribs.height_constraint.max(available_space.height);
+
+        f32::min(max, f32::max(min, h))
+    }
+
+
+    fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
+
+    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+
+        let w = match self.attributes().width {
+            Length::Px(px) => {
+                px as f32
+            },
+            Length::FitContent => {
+                self.content_width(available_space, text_renderer)
+            },
+            _ => available_space.width,
+        };
+
+
+        let attribs = self.attributes();
+
+        let min = attribs.width_constraint.min();
+        let max = attribs.width_constraint.max(available_space.width);
+
+        f32::min(max, f32::max(min, w))
+
+    }
 
     fn width(self, w: Length) -> Self where Self: Sized {
         self.add_attribute(Attribute::Width(w))
@@ -81,11 +123,11 @@ pub trait Element<Message> {
             },
 
             WidthConstraint(constraint) => {
-                cur.width_contraint = constraint;
+                cur.width_constraint = constraint;
             },
 
             HeightConstraint(constraint) => {
-                cur.height_contraint = constraint;
+                cur.height_constraint = constraint;
             },
 
             Spacing(s) => {

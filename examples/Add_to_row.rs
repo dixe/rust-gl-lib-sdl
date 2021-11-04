@@ -69,10 +69,10 @@ impl gls::State<Message> for World {
             .spacing(10.0)
             .add(Row::new()
                  .width(Fill)
-                 .add_attribute(Attribute::Spacing(20.0))
+                 .add_attribute(Attribute::Spacing(10.0))
                  .add(Button::new(gl, "Add", Some(Message::Add))
                       .width(Fill)
-                      .height(Px(50)))k
+                      .height(Px(50)))
                  .add(Button::new(gl, "Sub", Some(Message::Sub))
                       .width(Fill)
                       .height(Px(50))))

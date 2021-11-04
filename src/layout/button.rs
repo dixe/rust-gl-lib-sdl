@@ -40,34 +40,12 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
         &mut self.attributes
     }
 
-    fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
-
-        match self.attributes().height {
-            Length::Px(px) => {
-                px as f32
-            },
-            Length::FitContent => {
-                text_renderer.render_box(&self.btn.content, 1.0).pixel_h
-            },
-            _ => available_space.height,
-        }
+    fn content_height(&self, _available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+        text_renderer.render_box(&self.btn.content, 1.0).pixel_h
     }
 
-    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
-
-        let w = match self.attributes().width {
-
-            Length::Px(px) => {
-                px as f32
-            },
-            Length::FitContent => {
-                text_renderer.render_box(&self.btn.content, 1.0).pixel_w
-
-            },
-            _ => available_space.width,
-        };
-
-        w
+    fn content_width(&self, _available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+        text_renderer.render_box(&self.btn.content, 1.0).pixel_w
     }
 
     fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
@@ -82,18 +60,11 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
 
         let attributes = self.attributes();
 
-
-
-        let max_h = attributes.width_contraint.max(available_space.width);
-
         let final_width = self.final_width(available_space, text_renderer);
-        new_comp.base.set_width(final_width, max_h);
-
-
-        let max_h = attributes.height_contraint.max(available_space.height);
+        new_comp.base.set_width(final_width);
 
         let final_height = self.final_height(available_space, text_renderer);
-        new_comp.base.set_height(final_height, max_h);
+        new_comp.base.set_height(final_height);
 
         container.add_component(new_comp.into());
     }

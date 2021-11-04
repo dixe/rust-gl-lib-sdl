@@ -44,13 +44,13 @@ impl ComponentBase {
         }
     }
 
-    pub fn set_width(&mut self, w_pixels: f32, available_w: f32) {
-        self.width = f32::min( w_pixels, available_w)
+    pub fn set_width(&mut self, w_pixels: f32) {
+        self.width = w_pixels;
     }
 
 
-    pub fn set_height(&mut self, h_pixels: f32, available_h: f32) {
-        self.height = f32::min(h_pixels, available_h)
+    pub fn set_height(&mut self, h_pixels: f32) {
+        self.height = h_pixels;
     }
 
     pub fn width(&self) -> f32 {
