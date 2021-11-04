@@ -1,5 +1,4 @@
 use crate::components::base::{OnTop, Component, ComponentEvent};
-use crate::window;
 
 
 pub enum HandleRes {
@@ -39,7 +38,7 @@ impl<Message> ComponentContainer<Message> where Message: Clone {
     }
 
 
-    fn handle_events(&mut self, _window_access: &window::WindowComponentAccess) {
+    fn handle_events(&mut self) {
 
         let mut popped_event = self.component_events.pop_front();
         while let Some(event) = popped_event {
@@ -67,7 +66,7 @@ impl<Message> ComponentContainer<Message> where Message: Clone {
     }
 
 
-    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event, window_access: &window::WindowComponentAccess) -> HandleRes {
+    pub fn handle_sdl_event(&mut self, event: sdl2::event::Event) -> HandleRes {
         use sdl2::event::Event;
 
         let mut res = HandleRes::Unused;
@@ -98,7 +97,7 @@ impl<Message> ComponentContainer<Message> where Message: Clone {
         };
 
 
-        self.handle_events(window_access);
+        self.handle_events();
         res
     }
 }

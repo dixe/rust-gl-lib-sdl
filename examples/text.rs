@@ -17,19 +17,11 @@ fn main() -> Result<(), failure::Error> {
 
     window.window_access().set_swap_interval(0);
 
-    let gl = &window.gl().clone();
-
-
     window.set_background_color(na::Vector4::new(0.9, 0.9, 0.9, 1.0));
 
     window.setup_blend();
 
-    let mut fps_sb = ScreenBox::full_screen(width as f32, height as f32);
-    let mut text_sb = ScreenBox::full_screen(width as f32, height as f32);
-
-
-    fps_sb.height = 50.0;
-    text_sb.y = 50.0;
+    let mut state = State {};
 
     loop {
 
@@ -41,12 +33,34 @@ fn main() -> Result<(), failure::Error> {
         let time_ms =  1.0 / window.deltatime();
 
 
-        window.text_renderer().render_text(&gl, &format!("Fps = {}", time_ms), Default::default(), fps_sb, 1.0);
-        window.text_renderer().render_text(&gl, &TEST_TEXT, Default::default(), text_sb, 1.0);
+        window.render_text(&format!("Fps = {}", time_ms));
+        window.render_text(&TEST_TEXT);
 
 
-        window.update::<()>(None);
+        window.update(&mut state);
 
+    }
+}
+
+#[derive(Debug, Clone)]
+enum Message {}
+
+struct State {}
+
+
+impl gls::State<Message> for State {
+
+    fn handle_message(&mut self, _message: &Message, _window_access: &gls::window::WindowComponentAccess) {
+
+    }
+
+
+    fn view(&self, _gl: &gl::Gl) -> gls::layout::node::Node<Message> {
+        use gls::layout::column::*;
+
+        let col = Column::new();
+
+        col.into()
     }
 }
 

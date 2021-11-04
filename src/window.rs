@@ -125,8 +125,6 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
         self.deltatime.time()
     }
 
-
-
     pub fn window_access(&self) -> &WindowComponentAccess {
         &self.window_component_access
     }
@@ -155,7 +153,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
 
         let mut popped_msg = self.container.messages.pop_front();
         while let Some(msg) = popped_msg {
-            state.handle_message(&msg);
+            state.handle_message(&msg, &self.window_component_access);
             self.container_dirty = true;
             popped_msg = self.container.messages.pop_front();
         }
@@ -216,7 +214,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
                 _ => {}
             };
 
-            self.container.handle_sdl_event(event.clone(), &self.window_component_access);
+            self.container.handle_sdl_event(event.clone());
 
             (self.event_handler)(event);
         }

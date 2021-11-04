@@ -6,6 +6,8 @@ use gl_lib_sdl::{
 use failure;
 use std::path::Path;
 
+
+
 #[derive(Debug, Clone)]
 pub enum Message {
     Add,
@@ -43,7 +45,7 @@ struct World {
 
 impl gls::State<Message> for World {
 
-    fn handle_message(&mut self, message: &Message) {
+    fn handle_message(&mut self, message: &Message, _window_access: &gls::window::WindowComponentAccess) {
 
         match message {
             Message::Add => { self.total += 1; },

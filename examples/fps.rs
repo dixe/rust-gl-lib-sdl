@@ -15,14 +15,9 @@ fn main() -> Result<(), failure::Error> {
     let mut window = gls::window::SdlGlWindow::new("Fps", width, height, font).unwrap();
 
 
-    let gl = &window.gl().clone();
-
-
     window.set_background_color(na::Vector4::new(0.9, 0.9, 0.9, 1.0));
 
     window.setup_blend();
-
-    let sb = ScreenBox::full_screen(width as f32, height as f32);
 
     let mut state = State {};
 
@@ -47,19 +42,14 @@ struct State {
 
 impl gls::State<Message> for State {
 
-    fn handle_message(&mut self, message: &Message) {
+    fn handle_message(&mut self, _message: &Message, _window_access: &gls::window::WindowComponentAccess) {
     }
 
-
-    fn view(&self, gl: &gl::Gl) -> Box::<gls::layout::element::Element<Message>> {
-        use gls::layout::row::*;
+    fn view(&self, _gl: &gl::Gl) -> gls::layout::node::Node<Message> {
         use gls::layout::column::*;
-        use gls::layout::*;
-        use gls::layout::element::*;
-        use gls::layout::attributes::*;
-        use gls::layout::button::*;
 
-        Box::new(Column::new())
+
+        Column::new().into()
 
     }
 }
