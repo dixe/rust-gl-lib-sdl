@@ -3,9 +3,9 @@
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Attributes {
     pub width: Length,
-    pub width_contraint: LengthContraint,
+    pub width_contraint: LengthConstraint,
     pub height: Length,
-    pub height_contraint: LengthContraint,
+    pub height_contraint: LengthConstraint,
     pub align: Align,
     pub padding: Padding,
     pub spacing: Spacing
@@ -13,37 +13,37 @@ pub struct Attributes {
 
 
 #[derive(Debug, Clone, Copy)]
-pub enum LengthContraint {
+pub enum LengthConstraint {
     Unbound,
     Max(u32),
     Min(u32),
     MinMax(u32, u32)
 }
 
-impl LengthContraint {
+impl LengthConstraint {
     pub fn max(&self, default: f32) -> f32 {
         match self {
-            LengthContraint::Unbound => default,
-            LengthContraint::Max(max) => *max as f32,
-            LengthContraint::MinMax(_, max) => *max as f32,
-            LengthContraint::Min(_) => default
+            LengthConstraint::Unbound => default,
+            LengthConstraint::Max(max) => *max as f32,
+            LengthConstraint::MinMax(_, max) => *max as f32,
+            LengthConstraint::Min(_) => default
         }
     }
 
     pub fn min(&self, default: f32) -> f32 {
         match self {
-            LengthContraint::Unbound => default,
-            LengthContraint::Max(_) => default,
-            LengthContraint::MinMax(min,_) => *min as f32,
-            LengthContraint::Min(min) => *min as f32
+            LengthConstraint::Unbound => default,
+            LengthConstraint::Max(_) => default,
+            LengthConstraint::MinMax(min,_) => *min as f32,
+            LengthConstraint::Min(min) => *min as f32
         }
     }
 }
 
 
-impl Default for LengthContraint {
+impl Default for LengthConstraint {
     fn default() -> Self {
-        LengthContraint::Unbound
+        LengthConstraint::Unbound
     }
 }
 
@@ -78,9 +78,9 @@ impl Default for Length {
 #[derive(Debug,Clone,Copy)]
 pub enum Attribute {
     Width(Length),
-    WidthContraint(LengthContraint),
+    WidthConstraint(LengthConstraint),
     Height(Length),
-    HeightContraint(LengthContraint),
+    HeightConstraint(LengthConstraint),
     Padding(f32),
     PaddingXY(f32,f32),
     PaddingEach(Padding),

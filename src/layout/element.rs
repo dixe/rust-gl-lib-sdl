@@ -1,6 +1,6 @@
 use super::*;
 use crate::components::container::*;
-use crate::layout::attributes::{self, Length, Attributes, Attribute};
+use crate::layout::attributes::{self, Length, LengthConstraint, Attributes, Attribute};
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 
 
@@ -27,6 +27,15 @@ pub trait Element<Message> {
 
     fn height(self, h: Length) -> Self where Self: Sized {
         self.add_attribute(Attribute::Height(h))
+    }
+
+
+    fn max_width(self, w: LengthConstraint) -> Self where Self: Sized {
+        self.add_attribute(Attribute::WidthConstraint(w))
+    }
+
+    fn max_height(self, h: LengthConstraint) -> Self where Self: Sized {
+        self.add_attribute(Attribute::HeightConstraint(h))
     }
 
     fn padding(self, p: f32) -> Self where Self: Sized {
@@ -71,11 +80,11 @@ pub trait Element<Message> {
                 cur.padding = padding
             },
 
-            WidthContraint(constraint) => {
+            WidthConstraint(constraint) => {
                 cur.width_contraint = constraint;
             },
 
-            HeightContraint(constraint) => {
+            HeightConstraint(constraint) => {
                 cur.height_contraint = constraint;
             },
 
