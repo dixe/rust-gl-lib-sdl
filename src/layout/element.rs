@@ -1,6 +1,6 @@
 use super::*;
 use crate::components::container::*;
-use crate::layout::attributes::{self, Length, Attributes, Attribute, LengthAttrib};
+use crate::layout::attributes::{self, Length, Attributes, Attribute};
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 
 
@@ -21,26 +21,21 @@ pub trait Element<Message> {
     fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
 
 
-    fn width(mut self, w: Length) -> Self where Self: Sized {
-        let mut cur = self.attributes_mut();
-        cur.width = LengthAttrib::No(w);
-        self
+    fn width(self, w: Length) -> Self where Self: Sized {
+        self.add_attribute(Attribute::Width(w))
     }
 
     fn height(self, h: Length) -> Self where Self: Sized {
-        self.add_attribute(Attribute::Height(LengthAttrib::No(h)))
+        self.add_attribute(Attribute::Height(h))
     }
 
     fn padding(self, p: f32) -> Self where Self: Sized {
         self.add_attribute(Attribute::Padding(p))
     }
 
-
-
     fn spacing(self, s: f32) -> Self where Self: Sized {
         self.add_attribute(Attribute::Spacing(s))
     }
-
 
     fn add_attribute(mut self, attribute: Attribute) -> Self where Self: Sized {
         use Attribute::*;
@@ -74,6 +69,14 @@ pub trait Element<Message> {
             },
             PaddingEach(padding) => {
                 cur.padding = padding
+            },
+
+            WidthContraint(constraint) => {
+                cur.width_contraint = constraint;
+            },
+
+            HeightContraint(constraint) => {
+                cur.height_contraint = constraint;
             },
 
             Spacing(s) => {

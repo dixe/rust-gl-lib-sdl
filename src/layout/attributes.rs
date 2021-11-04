@@ -1,22 +1,11 @@
-/*
-Size of fx a button
-
-We want to specify:
- * exact size
- * fit content
- * fill portion of available space
-
-Along with a max and or min, These max and min should also be specified by on of the above
-
- */
-
-
 
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Attributes {
-    pub width: LengthAttrib,
-    pub height: LengthAttrib,
+    pub width: Length,
+    pub width_contraint: LengthContraint,
+    pub height: Length,
+    pub height_contraint: LengthContraint,
     pub align: Align,
     pub padding: Padding,
     pub spacing: Spacing
@@ -24,23 +13,44 @@ pub struct Attributes {
 
 
 #[derive(Debug, Clone, Copy)]
-pub enum LengthAttrib {
-    No(Length),
-    Max(Length),
-    Min(Length),
-    MinMax(Length, Length)
+pub enum LengthContraint {
+    Unbound,
+    Max(u32),
+    Min(u32),
+    MinMax(u32, u32)
 }
 
-impl Default for LengthAttrib {
+impl LengthContraint {
+    pub fn max(&self, default: f32) -> f32 {
+        match self {
+            LengthContraint::Unbound => default,
+            LengthContraint::Max(max) => *max as f32,
+            LengthContraint::MinMax(_, max) => *max as f32,
+            LengthContraint::Min(_) => default
+        }
+    }
+
+    pub fn min(&self, default: f32) -> f32 {
+        match self {
+            LengthContraint::Unbound => default,
+            LengthContraint::Max(_) => default,
+            LengthContraint::MinMax(min,_) => *min as f32,
+            LengthContraint::Min(min) => *min as f32
+        }
+    }
+}
+
+
+impl Default for LengthContraint {
     fn default() -> Self {
-        LengthAttrib::No(Default::default())
+        LengthContraint::Unbound
     }
 }
 
 #[derive(Debug, Clone, Copy)]
 pub enum Length {
     /// Length equal to given number of pixels
-    Px(f32),
+    Px(u32),
 
     /// Fill all the avialable space
     /// Is equivalent to FillPortion 1
@@ -67,8 +77,10 @@ impl Default for Length {
 /// Attributes can be used to specify how an element renders
 #[derive(Debug,Clone,Copy)]
 pub enum Attribute {
-    Width(LengthAttrib),
-    Height(LengthAttrib),
+    Width(Length),
+    WidthContraint(LengthContraint),
+    Height(Length),
+    HeightContraint(LengthContraint),
     Padding(f32),
     PaddingXY(f32,f32),
     PaddingEach(Padding),

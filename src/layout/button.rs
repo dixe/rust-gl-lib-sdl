@@ -2,7 +2,7 @@ use super::*;
 use crate::components::base::*;
 use crate::components::button as comp_btn;
 use crate::components::container::*;
-use crate::layout::attributes::{Length, Attributes, LengthAttrib};
+use crate::layout::attributes::{Length, Attributes};
 use crate::layout::element::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::gl;
@@ -43,58 +43,34 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
     fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
 
         match self.attributes().height {
-            LengthAttrib::No(l) =>
-                match l {
-                    Length::Px(px) => {
-                        px
-                    },
-                    Length::FitContent => {
-                        text_renderer.render_box(&self.btn.content, 1.0).pixel_h
-
-                    },
-                    _ => available_space.height,
-
-                },
-            LengthAttrib::Max(l) => {
-                match l {
-                    Length::Px(_px) =>{ unimplemented!() },
-                    _ => unimplemented!(),
-                }
+            Length::Px(px) => {
+                px as f32
             },
-            _ => unimplemented!(),
+            Length::FitContent => {
+                text_renderer.render_box(&self.btn.content, 1.0).pixel_h
+            },
+            _ => available_space.height,
         }
     }
 
     fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
 
         let w = match self.attributes().width {
-            LengthAttrib::No(l) =>
-                match l {
-                    Length::Px(px) => {
-                        px
-                    },
-                    Length::FitContent => {
-                        text_renderer.render_box(&self.btn.content, 1.0).pixel_w
 
-                    },
-                    _ => available_space.width,
-
-                },
-            LengthAttrib::Max(l) => {
-                match l {
-                    Length::Px(_px) =>{ unimplemented!() },
-                    _ => unimplemented!(),
-                }
+            Length::Px(px) => {
+                px as f32
             },
-            _ => unimplemented!(),
-        };
+            Length::FitContent => {
+                text_renderer.render_box(&self.btn.content, 1.0).pixel_w
 
-        println!("{:?}", w);
+            },
+            _ => available_space.width,
+        };
 
         w
     }
 
-    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, _text_renderer: &TextRenderer) {
+    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
 
         // Update out base component to have the correct size
 
@@ -105,43 +81,19 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
         new_comp.base.coords.y = available_space.y;
 
         let attributes = self.attributes();
-        match attributes.width {
-            LengthAttrib::No(l) =>
-                match l {
-                    Length::Px(px) => {
-                        new_comp.base.set_width(px, available_space.width)
-                    },
-                    Length::Fill => {new_comp.base.set_width(available_space.width, available_space.width)},
-                    _ => unimplemented!(),
 
-                },
-            LengthAttrib::Max(l) => {
-                match l {
-                    Length::Px(_px) =>{ unimplemented!() },
-                    _ => unimplemented!(),
-                }
-            },
-            _ => unimplemented!(),
-        };
 
-        match attributes.height {
-            LengthAttrib::No(l) =>
-                match l {
-                    Length::Px(px) => {
-                        new_comp.base.set_height(px, available_space.height)
-                    },
-                    Length::Fill => {new_comp.base.set_height(available_space.height, available_space.height)},
-                    _ => unimplemented!(),
 
-                },
-            LengthAttrib::Max(l) => {
-                match l {
-                    Length::Px(_px) =>{ unimplemented!() },
-                    _ => unimplemented!(),
-                }
-            },
-            _ => unimplemented!(),
-        };
+        let max_h = attributes.width_contraint.max(available_space.width);
+
+        let final_width = self.final_width(available_space, text_renderer);
+        new_comp.base.set_width(final_width, max_h);
+
+
+        let max_h = attributes.height_contraint.max(available_space.height);
+
+        let final_height = self.final_height(available_space, text_renderer);
+        new_comp.base.set_height(final_height, max_h);
 
         container.add_component(new_comp.into());
     }

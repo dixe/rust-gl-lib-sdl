@@ -1,5 +1,5 @@
 use crate::components::container::*;
-use crate::layout::attributes::{*, Length::*, LengthAttrib::*};
+use crate::layout::attributes::{*, Length::*};
 use crate::layout::element::*;
 use crate::layout::node::*;
 use super::*;
@@ -65,21 +65,16 @@ impl<'a, Message> Element<Message> for Column<'a, Message> {
 
         // loop over children width and calc abos space used. That is px(u32) and FitContent
         let mut abs_height = 0.;
-        let mut fill_count = 0.0;
+        let mut fill_count = 0;
         for c in &self.children {
             println!("Child h={:?}", c.attributes().height );
             match c.attributes().height {
-                No(l) => {
-                    match l {
-                        Px(px) => { abs_height += px; },
-                        FitContent => {
-                            abs_height += c.final_height(available_space, text_renderer);
-                        },
-                        _ => { fill_count += 1.0; }
-
-                    }
+                Px(px) => { abs_height += px as f32; },
+                FitContent => {
+                    abs_height += c.final_height(available_space, text_renderer);
                 },
-                _ => unimplemented!()
+                Fill => { fill_count += 1; }
+                FillPortion(x) => { fill_count += x; }
             }
         }
 
@@ -110,22 +105,16 @@ impl<'a, Message> Element<Message> for Column<'a, Message> {
             child_space.x = available_space.x + padding.left;
             child_space.y = next_y;
             match c.attributes().height {
-                No(l) => {
-                    match l {
-                        Px(px) => {
-                            child_space.height = px as f32;
-                        },
-                        FitContent => {
-                            child_space.height = c.final_height(available_space, text_renderer);
-                        },
-                        Fill => {
-                            child_space.height = dynamic_height / fill_count as f32 ;
-                        },
-                        _ => unimplemented!(),
-
-                    }
+                Px(px) => {
+                    child_space.height = px as f32;
                 },
-                _ => unimplemented!()
+                FitContent => {
+                    child_space.height = c.final_height(available_space, text_renderer);
+                },
+                Fill => {
+                    child_space.height = dynamic_height / fill_count as f32 ;
+                },
+                _ => unimplemented!(),
             }
 
             next_y += child_space.height + spacing.y;

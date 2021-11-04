@@ -21,8 +21,6 @@ impl<'a, Message> Row<'a, Message> {
         }
     }
 
-
-
     pub fn add<E>(mut self, el: E) -> Self
     where
         E: Into<Node<'a, Message>> {
