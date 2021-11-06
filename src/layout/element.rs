@@ -2,7 +2,7 @@ use super::*;
 use crate::components::container::*;
 use crate::layout::attributes::{self, Length, LengthConstraint, Attributes, Attribute, AlignmentY, AlignmentX};
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
-
+use crate::layout::node::Node;
 
 pub trait Element<Message> {
 
@@ -192,4 +192,80 @@ pub trait Element<Message> {
         };
         self
     }
+}
+
+
+pub(crate) fn align_child_spaces<'a, Message>(children: &Vec::<Node<'a, Message>>, child_spaces: &mut Vec::<RealizedSize>, content_width: f32, mut unused_x: f32, unused_y: f32) {
+
+    let mut center_elements = 0;
+    let mut center_elements_width = 0.0;
+
+    let mut center_elements_left = None;
+    let mut center_elements_right = 0.0;
+
+
+    for i in 0..children.len() {
+        let c = &children[i];
+        let cs = &mut child_spaces[i];
+
+
+        match c.attributes().align.x {
+            AlignmentX::Center => {
+                match center_elements_left {
+                    None => {
+                        center_elements_left = Some(cs.x);
+                    },
+                    _ => {}// Already set we a previous element
+                }
+
+                center_elements_right = cs.x + cs.width;
+                center_elements += 1;
+
+            },
+            AlignmentX::Right => { break }, // when we first align to the right, centering does nothing after
+            _ => {}
+        }
+    }
+
+    let mut center_elements_width = match center_elements_left {
+        None => None,
+        Some(left) => Some(center_elements_right - left)
+    };
+
+
+    let mut x_offset = 0.0;
+
+    for i in 0..children.len() {
+        let c = &children[i];
+        let cs = &mut child_spaces[i];
+
+
+        match c.attributes().align.x {
+            AlignmentX::Left => {}, //default is left, do nothing},
+            AlignmentX::Center => {
+                match center_elements_width {
+                    None => {},
+                    Some(offset) => {
+
+                        let desired_x = content_width/2.0 - offset/2.0 - center_elements_left.unwrap();
+                        let new_offset = f32::max(0.0, desired_x);
+                        x_offset += new_offset;
+                        unused_x -= new_offset;
+                        center_elements_width = None;
+                    }
+                }
+            },
+            AlignmentX::Right => {
+                // take all remaning space to the right and offset by that
+                x_offset += f32::max(0.0, unused_x);
+                //println!("{:?}", unused_x);
+                unused_x = 0.0;
+            },
+
+        }
+
+
+        cs.x += x_offset;
+    }
+
 }
