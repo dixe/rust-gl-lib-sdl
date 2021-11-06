@@ -75,7 +75,6 @@ impl<'a, Message> Element<Message> for Column<'a, Message> {
             }
         }
 
-
         if self.children.len() == 0 {
             return;
         }
@@ -86,7 +85,6 @@ impl<'a, Message> Element<Message> for Column<'a, Message> {
         let spacing = attribs.spacing;
 
         let mut next_y = available_space.y + padding.top;
-
 
         let content_width = available_space.width - padding.left - padding.right;
         let content_height = available_space.height - padding.bottom - padding.top;

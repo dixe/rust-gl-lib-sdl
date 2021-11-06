@@ -6,7 +6,7 @@ pub struct Attributes {
     pub width_constraint: LengthConstraint,
     pub height: Length,
     pub height_constraint: LengthConstraint,
-    pub align: Align,
+    pub align: Alignment,
     pub padding: Padding,
     pub spacing: Spacing
 }
@@ -86,25 +86,42 @@ pub enum Attribute {
     PaddingEach(Padding),
     Spacing(f32),
     SpacingXY(f32, f32),
+    Alignment(Alignment),
+    AlignmentX(AlignmentX),
+    AlignmentY(AlignmentY),
 
 }
 
 #[derive(Debug, Clone, Copy, Default)]
-pub struct Align {
-    pub x: Alignment,
-    pub y: Alignment,
+pub struct Alignment {
+    pub x: AlignmentX,
+    pub y: AlignmentY,
 }
 
 #[derive(Debug,Clone,Copy)]
-pub enum Alignment {
+pub enum AlignmentX {
     Left,
     Right,
     Center
 }
 
-impl Default for Alignment {
+
+#[derive(Debug, Clone, Copy)]
+pub enum AlignmentY {
+    Top,
+    Bottom,
+    Center
+}
+
+impl Default for AlignmentX {
     fn default() -> Self {
-        Alignment::Center
+        AlignmentX::Center
+    }
+}
+
+impl Default for AlignmentY {
+    fn default() -> Self {
+        AlignmentY::Center
     }
 }
 

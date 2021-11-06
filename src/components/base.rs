@@ -65,7 +65,6 @@ impl ComponentBase {
 
         let sc_top_left = Self::window_to_screen_coords(self.coords.x, self.coords.y, screen_w, screen_h);
 
-
         let x_scale = self.width / screen_w  * 2.0;
         let y_scale = self.height / screen_h * 2.0;
 

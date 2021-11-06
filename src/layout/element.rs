@@ -1,6 +1,6 @@
 use super::*;
 use crate::components::container::*;
-use crate::layout::attributes::{self, Length, LengthConstraint, Attributes, Attribute};
+use crate::layout::attributes::{self, Length, LengthConstraint, Attributes, Attribute, AlignmentY, AlignmentX};
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 
 
@@ -23,7 +23,8 @@ pub trait Element<Message> {
                 px as f32
             },
             Length::FitContent => {
-                self.content_height(available_space, text_renderer)
+                let ch = self.content_height(available_space, text_renderer);
+                ch
             },
             _ => available_space.height,
         };
@@ -88,6 +89,36 @@ pub trait Element<Message> {
         self.add_attribute(Attribute::Spacing(s))
     }
 
+
+    fn center(self) -> Self where Self: Sized {
+        self.add_attribute(Attribute::AlignmentX(AlignmentX::Center))
+            .add_attribute(Attribute::AlignmentY(AlignmentY::Center))
+    }
+
+    fn center_x(self) -> Self where Self: Sized {
+        self.add_attribute(Attribute::AlignmentX(AlignmentX::Center))
+    }
+
+    fn center_y(self) -> Self where Self: Sized {
+        self.add_attribute(Attribute::AlignmentY(AlignmentY::Center))
+    }
+
+    fn align_top(self) -> Self where Self: Sized {
+        self.add_attribute(Attribute::AlignmentY(AlignmentY::Top))
+    }
+
+    fn align_bottom(self) -> Self where Self: Sized {
+        self.add_attribute(Attribute::AlignmentY(AlignmentY::Bottom))
+    }
+
+    fn align_left(self) -> Self where Self: Sized {
+        self.add_attribute(Attribute::AlignmentX(AlignmentX::Left))
+    }
+
+    fn align_right(self) -> Self where Self: Sized {
+        self.add_attribute(Attribute::AlignmentX(AlignmentX::Right))
+    }
+
     fn add_attribute(mut self, attribute: Attribute) -> Self where Self: Sized {
         use Attribute::*;
 
@@ -135,7 +166,7 @@ pub trait Element<Message> {
                     x: s,
                     y: s
                 };
-                cur.spacing = spacing
+                cur.spacing = spacing;
             },
 
             SpacingXY(x, y) => {
@@ -143,8 +174,19 @@ pub trait Element<Message> {
                     x,
                     y
                 };
-                cur.spacing = spacing
+                cur.spacing = spacing;
             },
+
+            Alignment(align) => {
+                cur.align = align;
+            },
+            AlignmentX(x) => {
+                cur.align.x = x;
+            },
+            AlignmentY(y) => {
+                cur.align.y = y;
+            },
+
         };
         self
     }

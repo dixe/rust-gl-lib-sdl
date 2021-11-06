@@ -2,7 +2,7 @@ use super::*;
 use crate::components::base::*;
 use crate::components::button as comp_btn;
 use crate::components::container::*;
-use crate::layout::attributes::{Length, Attributes};
+use crate::layout::attributes::{Attributes};
 use crate::layout::element::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::gl;
@@ -40,12 +40,14 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
         &mut self.attributes
     }
 
-    fn content_height(&self, _available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
-        text_renderer.render_box(&self.btn.content, 1.0).pixel_h
+    fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+        let max_width = self.final_width(available_space, text_renderer);
+        text_renderer.render_box(&self.btn.content, max_width, 1.0).total_height
     }
 
-    fn content_width(&self, _available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
-        text_renderer.render_box(&self.btn.content, 1.0).pixel_w
+    fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+        let max_width = self.final_width(available_space, text_renderer);
+        text_renderer.render_box(&self.btn.content, max_width, 1.0).total_width
     }
 
     fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
@@ -54,11 +56,8 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
 
         let mut new_comp: Component<Message> = self.btn.clone().into();
 
-
         new_comp.base.coords.x = available_space.x;
         new_comp.base.coords.y = available_space.y;
-
-        let attributes = self.attributes();
 
         let final_width = self.final_width(available_space, text_renderer);
         new_comp.base.set_width(final_width);
@@ -66,7 +65,10 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
         let final_height = self.final_height(available_space, text_renderer);
         new_comp.base.set_height(final_height);
 
-        container.add_component(new_comp.into());
+        let btn: Component<Message> = new_comp.into();
+
+        container.add_component(btn);
+
     }
 }
 

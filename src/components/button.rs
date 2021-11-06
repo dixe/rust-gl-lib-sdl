@@ -40,7 +40,7 @@ impl<Message> Button<Message> where Message: Clone {
 
         self.shader.set_f32(gl, "w_half", base.width / screen_w);
 
-        self.shader.set_f32(gl, "radius", 0.1 / (f32::max(base.width / screen_w, base.height / screen_h)));
+        self.shader.set_f32(gl, "radius", 0.0); //0.1 / (f32::max(base.width / screen_w, base.height / screen_h)));
 
         render_square.render(&gl);
 
@@ -74,12 +74,14 @@ uniform mat4 transform;
 
 out VS_OUTPUT {
     vec2 FragPos;
+    vec2 Pos;
 } OUT;
 
 void main()
 {
     vec4 pos = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     OUT.FragPos = aPos.xy;
+    OUT.Pos = aPos.xy;
     gl_Position = pos;
 
 }";
@@ -90,6 +92,7 @@ void main()
 
 in VS_OUTPUT {
     vec2 FragPos;
+    vec2 Pos;
 } IN;
 
 out vec4 FragColor;
@@ -140,3 +143,14 @@ void main()
 
     Shader::new(gl, vert_source, frag_source)
 }
+
+
+/*
+
+
+insert into shader before FragColor to draw two diagonal lines to see center point
+if ( abs(IN.Pos.x - IN.Pos.y) < 0.01 || abs(- IN.Pos.x - IN.Pos.y) < 0.01)
+{
+//col = vec3(1.0,0.0,0.0);
+}
+*/
