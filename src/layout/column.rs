@@ -45,7 +45,7 @@ impl<'a, Message> Element<Message> for Column<'a, Message> {
     fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         let mut abs_height = 0.;
         for c in &self.children {
-            abs_height += c.final_height(available_space, text_renderer);
+            abs_height += c.content_height(available_space, text_renderer);
         }
 
         abs_height

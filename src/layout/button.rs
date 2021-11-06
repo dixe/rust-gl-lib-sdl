@@ -46,8 +46,7 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
     }
 
     fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
-        let max_width = self.final_width(available_space, text_renderer);
-        text_renderer.render_box(&self.btn.content, max_width, 1.0).total_width
+        text_renderer.render_box(&self.btn.content, available_space.width, 1.0).total_width
     }
 
     fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
@@ -55,7 +54,6 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
         // Update out base component to have the correct size
 
         let mut new_comp: Component<Message> = self.btn.clone().into();
-
         new_comp.base.coords.x = available_space.x;
         new_comp.base.coords.y = available_space.y;
 

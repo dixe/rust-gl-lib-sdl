@@ -36,7 +36,9 @@ pub trait Element<Message> {
         let min = attribs.height_constraint.min();
         let max = attribs.height_constraint.max(available_space.height);
 
+
         f32::min(max, f32::max(min, h))
+
     }
 
 
@@ -90,16 +92,16 @@ pub trait Element<Message> {
     }
 
 
-    fn center(self) -> Self where Self: Sized {
+    fn align_center(self) -> Self where Self: Sized {
         self.add_attribute(Attribute::AlignmentX(AlignmentX::Center))
             .add_attribute(Attribute::AlignmentY(AlignmentY::Center))
     }
 
-    fn center_x(self) -> Self where Self: Sized {
+    fn align_center_x(self) -> Self where Self: Sized {
         self.add_attribute(Attribute::AlignmentX(AlignmentX::Center))
     }
 
-    fn center_y(self) -> Self where Self: Sized {
+    fn align_center_y(self) -> Self where Self: Sized {
         self.add_attribute(Attribute::AlignmentY(AlignmentY::Center))
     }
 
