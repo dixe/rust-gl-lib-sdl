@@ -63,45 +63,47 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
 
     fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
 
-        // loop over children width and calc abos space used. That is px(u32) and FitContent
+        if self.children.len() == 0 {
+            return;
+        }
+
+
+        // loop over children width and calc abs space used. That is px(u32) and FitContent
         let mut abs_width = 0.;
         let mut fill_count = 0;
+
+        let attribs = self.attributes();
+        let padding = attribs.padding;
+        let spacing = attribs.spacing;
+
+
+        let content_space = &RealizedSize {
+            x: available_space.x + padding.left,
+            y: available_space.y + padding.top,
+            width: self.final_width(available_space, text_renderer) - padding.right - padding.left,
+            height: self.final_height(available_space, text_renderer) - padding.bottom - padding.top,
+        };
+
+
         for c in &self.children {
             match c.attributes().width {
                 Px(px) => { abs_width += px as f32; },
-                FitContent => { abs_width += c.final_width(available_space, text_renderer); },
+                FitContent => { abs_width += c.final_width(content_space, text_renderer); },
                 Fill => { fill_count += 1; }
                 FillPortion(x) => { fill_count += x; }
             }
         }
 
 
-        if self.children.len() == 0 {
-            return;
-        }
 
-        let attribs = self.attributes();
+        let mut next_x = available_space.x;
 
-        let padding = attribs.padding;
-        let spacing = attribs.spacing;
-
-        let mut next_x = available_space.x + padding.left;
-
-        let content_width = available_space.width - padding.left - padding.right;
-        let content_height = available_space.height - padding.bottom - padding.top;
-
-        let dynamic_width = f32::max(0.0, content_width - abs_width) - (self.children.len() -1 ) as f32 * spacing.x;
+        let dynamic_width = f32::max(0.0, content_space.width - abs_width) - (self.children.len() -1 ) as f32 * spacing.x;
 
         let mut child_spaces = Vec::new();
         for c in &self.children {
-            let mut child_space = *available_space;
-            child_space.width = 0.0;
-            child_space.height = content_height;
-
-
+            let mut child_space = *content_space;
             child_space.x = next_x;
-            child_space.y = available_space.y + padding.top;
-
 
             match c.attributes().width {
                 Px(px) => {
@@ -127,12 +129,10 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
         next_x -= spacing.x;
 
         // TODO: Make this generic for childspaces on element. To work on both X and Y
-
-
-        let unused_x = f32::max(0.0, content_width - (next_x - spacing.x));
+        let unused_x = f32::max(0.0, content_space.width - (next_x - spacing.x));
         let unused_y = 0.0;
 
-        align_child_spaces(&self.children, &mut child_spaces, content_width, unused_x, unused_y);
+        align_child_spaces(&self.children, &mut child_spaces, content_space.width, unused_x, unused_y);
 
         for i in 0..self.children.len() {
             self.children[i].add_to_container(container, &child_spaces[i], text_renderer);

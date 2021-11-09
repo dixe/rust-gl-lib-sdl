@@ -41,9 +41,8 @@ pub struct SdlGlWindow<Message> {
     render_square: square::Square,
     window_component_access: WindowComponentAccess,
     container: ComponentContainer<Message>,
-    container_dirty: bool
-
-
+    container_dirty: bool,
+    last_mouse_event: Option<sdl2::event::Event>
 }
 
 
@@ -102,7 +101,8 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
                 video_subsystem
             },
             container: ComponentContainer::new(),
-            container_dirty: true
+            container_dirty: true,
+            last_mouse_event: None,
         })
 
     }
@@ -133,13 +133,18 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
     /// Finish with clearing color_buffer_bit and depth_buffer_bit
     pub fn update(&mut self, state: &mut dyn State<Message>) {
 
-        if self.container_dirty {
 
+        if self.container_dirty {
             let mut cont = ComponentContainer::new();
             let size = (&self.viewport).into();
             state.view(&self.gl).add_to_container(&mut cont, &size, &self.text_renderer);
             self.container = cont;
             self.container_dirty = false;
+            // Handle keeping hover
+            if let Some(mouse_move) = &self.last_mouse_event {
+                //
+                self.container.handle_sdl_event(mouse_move.clone());
+            }
         }
 
 
@@ -183,6 +188,11 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
 
     }
 
+    pub fn text_renderer(&mut self) -> &text_renderer::TextRenderer {
+        &self.text_renderer
+
+    }
+
     pub fn setup_blend(&mut self) {
         self.text_renderer.setup_blend(&self.gl);
     }
@@ -211,6 +221,9 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
                     self.viewport.set_used(&self.gl);
                     self.container_dirty = true;
                 },
+                Event::MouseMotion {..}  => {
+                    self.last_mouse_event = Some(event.clone());
+                }
                 _ => {}
             };
 
@@ -219,7 +232,6 @@ impl<Message> SdlGlWindow<Message> where Message: Clone {
             (self.event_handler)(event);
         }
     }
-
 }
 
 

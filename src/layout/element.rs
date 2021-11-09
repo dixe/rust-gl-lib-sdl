@@ -36,7 +36,6 @@ pub trait Element<Message> {
         let min = attribs.height_constraint.min();
         let max = attribs.height_constraint.max(available_space.height);
 
-
         f32::min(max, f32::max(min, h))
 
     }
@@ -195,10 +194,7 @@ pub trait Element<Message> {
 }
 
 
-pub(crate) fn align_child_spaces<'a, Message>(children: &Vec::<Node<'a, Message>>, child_spaces: &mut Vec::<RealizedSize>, content_width: f32, mut unused_x: f32, unused_y: f32) {
-
-    let mut center_elements = 0;
-    let mut center_elements_width = 0.0;
+pub(crate) fn align_child_spaces<'a, Message>(children: &Vec::<Node<'a, Message>>, child_spaces: &mut Vec::<RealizedSize>, content_width: f32, mut unused_x: f32, _unused_y: f32) {
 
     let mut center_elements_left = None;
     let mut center_elements_right = 0.0;
@@ -219,9 +215,8 @@ pub(crate) fn align_child_spaces<'a, Message>(children: &Vec::<Node<'a, Message>
                 }
 
                 center_elements_right = cs.x + cs.width;
-                center_elements += 1;
-
             },
+
             AlignmentX::Right => { break }, // when we first align to the right, centering does nothing after
             _ => {}
         }
