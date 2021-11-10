@@ -147,6 +147,7 @@ where Message: 'a {
             child_spaces.push(child_space);
         }
 
+        println!("Row next_x {:?}", next_x);
 
         ChildSpaceInfo {
             child_spaces,

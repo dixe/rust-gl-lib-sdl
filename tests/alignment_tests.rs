@@ -81,6 +81,7 @@ fn align_right() {
 
     let btn_width = 20;
     let spacing = 10;
+    let padding = 10;
 
     let col = Column::new()
         .width(Fill)
@@ -99,11 +100,13 @@ fn align_right() {
     let node: Node<Message>  = col.into();
     let size = RealizedSize { x: 0.0, y: 0.0, width: width as f32, height: height as f32};
     let mut cont = ComponentContainer::new();
+
     node.add_to_container(&mut cont, &size, window.text_renderer());
+
     for (_, comp) in &cont.components {
         println!("{:?}",comp.base.coords.x as i32);
         // X should be width - width - spacing
-        assert_eq!(comp.base.coords.x as i32, (width as i32 - btn_width - spacing));
+        assert_eq!(comp.base.coords.x as i32, (width as i32 - btn_width - padding));
         assert_eq!(comp.base.coords.y as i32, spacing);
     }
 
@@ -130,7 +133,7 @@ fn align_center() {
         .spacing(spacing as f32)
         .add(Row::new()
              .width(Fill)
-             .add_attribute(Attribute::Spacing(10.0))
+             .add_attribute(Attribute::Spacing(spacing as f32))
              .add(Button::new(&window.gl(), "Right", Some(Message::Msg1))
                   .width(Px(btn_width as u32))
                   .align_center()

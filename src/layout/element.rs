@@ -253,7 +253,7 @@ pub(crate) fn align_child_spaces<'a, Message>(children: &Vec::<Node<'a, Message>
             AlignmentX::Right => {
                 // take all remaning space to the right and offset by that
                 x_offset += f32::max(0.0, unused_x);
-                //println!("{:?}", unused_x);
+                println!(" cs = {:?} unused _x = {}", cs, unused_x);
                 unused_x = 0.0;
             },
 

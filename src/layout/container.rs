@@ -50,6 +50,7 @@ pub trait Container<Message>: Element<Message> {
             height: self.final_height(available_space, text_renderer) - padding.bottom - padding.top,
         };
 
+        println!("{:?}",content_space);
 
         let height_info = self.children_height_info(content_space, text_renderer);
 
@@ -73,10 +74,13 @@ pub trait Container<Message>: Element<Message> {
             dynamic_height
         });
 
-        let unused_x = f32::max(0.0, content_space.width - (child_spaces_info.next.x - spacing.x));
-        let unused_y = f32::max(0.0, content_space.height - (child_spaces_info.next.y - spacing.y));
+
+        let unused_x = f32::max(0.0, content_space.width + content_space.x - (child_spaces_info.next.x - spacing.x));
+        let unused_y = f32::max(0.0, content_space.height + content_space.y - (child_spaces_info.next.y - spacing.y));
 
         align_child_spaces(self.children(), &mut child_spaces_info.child_spaces, content_space.width, unused_x, unused_y);
+
+
         for i in 0..self.children().len() {
             self.children()[i].add_to_container(container, &child_spaces_info.child_spaces[i], text_renderer);
         }
