@@ -3,7 +3,10 @@ use crate::layout::attributes::{*, Length::*};
 use crate::layout::element::*;
 use super::*;
 use crate::layout::node::*;
+use crate::layout::container::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
+use std::marker;
+
 
 pub struct Row<'a, Message> {
     children: Vec::<Node<'a, Message>>,
@@ -67,76 +70,7 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
             return;
         }
 
-
-        // loop over children width and calc abs space used. That is px(u32) and FitContent
-        let mut abs_width = 0.;
-        let mut fill_count = 0;
-
-        let attribs = self.attributes();
-        let padding = attribs.padding;
-        let spacing = attribs.spacing;
-
-
-        let content_space = &RealizedSize {
-            x: available_space.x + padding.left,
-            y: available_space.y + padding.top,
-            width: self.final_width(available_space, text_renderer) - padding.right - padding.left,
-            height: self.final_height(available_space, text_renderer) - padding.bottom - padding.top,
-        };
-
-
-        for c in &self.children {
-            match c.attributes().width {
-                Px(px) => { abs_width += px as f32; },
-                FitContent => { abs_width += c.final_width(content_space, text_renderer); },
-                Fill => { fill_count += 1; }
-                FillPortion(x) => { fill_count += x; }
-            }
-        }
-
-
-
-        let mut next_x = available_space.x;
-
-        let dynamic_width = f32::max(0.0, content_space.width - abs_width) - (self.children.len() -1 ) as f32 * spacing.x;
-
-        let mut child_spaces = Vec::new();
-        for c in &self.children {
-            let mut child_space = *content_space;
-            child_space.x = next_x;
-
-            match c.attributes().width {
-                Px(px) => {
-                    child_space.width = px as f32;
-                },
-                FitContent => {
-                    child_space.width = c.final_width(available_space, text_renderer);
-                },
-                Fill => {
-                    child_space.width = dynamic_width / fill_count as f32 ;
-                },
-                FillPortion(p) => {
-                    child_space.width = (dynamic_width / fill_count as f32) * p as f32;
-                },
-            }
-
-            next_x += child_space.width + spacing.x;
-
-            child_spaces.push(child_space);
-
-        }
-
-        next_x -= spacing.x;
-
-        // TODO: Make this generic for childspaces on element. To work on both X and Y
-        let unused_x = f32::max(0.0, content_space.width - (next_x - spacing.x));
-        let unused_y = 0.0;
-
-        align_child_spaces(&self.children, &mut child_spaces, content_space.width, unused_x, unused_y);
-
-        for i in 0..self.children.len() {
-            self.children[i].add_to_container(container, &child_spaces[i], text_renderer);
-        }
+        self.add_children_to_container(container, available_space, text_renderer);
     }
 }
 
@@ -152,4 +86,80 @@ where
             element: Box::new(row)
         }
     }
+}
+
+
+impl<'a, Message> Container<Message> for Row<'a, Message>
+where Message: 'a {
+
+    fn children_width_info(&self, content_space: &RealizedSize, text_renderer: &TextRenderer) -> ChildrenAbsAndFill<Width> {
+
+        let mut abs_width = 0.;
+        let mut fill_count = 0;
+        for c in &self.children {
+            match c.attributes().width {
+                Px(px) => { abs_width += px as f32; },
+                FitContent => { abs_width += c.final_width(content_space, text_renderer); },
+                Fill => { fill_count += 1; }
+                FillPortion(x) => { fill_count += x; }
+            }
+        }
+        ChildrenAbsAndFill::<Width> {
+            abs_length: abs_width,
+            fill_count: fill_count,
+            child_count: self.children.len() as u32,
+            _marker: marker::PhantomData::<Width>,
+        }
+    }
+
+
+    fn calculate_child_spaces(&self, update_info: &mut UpdateInfo) -> ChildSpaceInfo {
+
+        let text_renderer = update_info.text_renderer;
+        let spacing = update_info.spacing;
+        let fill_count = update_info.width_info.fill_count;
+        let content_space = update_info.content_space;
+        let mut next_x = update_info.next.x;
+        let dynamic_width = update_info.dynamic_width;
+
+        let mut child_spaces = Vec::new();
+        for child in &self.children {
+
+            let mut child_space = *content_space;
+            child_space.x = next_x;
+
+            match child.attributes().width {
+                Px(px) => {
+                    child_space.width = px as f32;
+                },
+                FitContent => {
+                    child_space.width = child.final_width(&child_space, text_renderer);
+                },
+                Fill => {
+                    child_space.width = dynamic_width / fill_count as f32 ;
+                },
+                FillPortion(p) => {
+                    child_space.width = (dynamic_width / fill_count as f32) * p as f32;
+                },
+            }
+
+            next_x += child_space.width + spacing.x;
+            child_spaces.push(child_space);
+        }
+
+
+        ChildSpaceInfo {
+            child_spaces,
+            next: NextStart {
+                x: next_x,
+                y: update_info.next.y
+            }
+        }
+
+    }
+
+    fn children(&self) -> &Vec::<Node<Message>>  {
+        &self.children
+    }
+
 }

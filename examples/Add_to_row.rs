@@ -67,6 +67,7 @@ impl gls::State<Message> for World {
         let col = Column::new().width(Fill)
             .padding(10.0)
             .spacing(10.0)
+            .height(Fill)
             .add(Row::new()
                  .width(Fill)
                  .add_attribute(Attribute::Spacing(10.0))
