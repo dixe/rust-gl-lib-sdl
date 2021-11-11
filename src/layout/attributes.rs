@@ -115,13 +115,13 @@ pub enum AlignmentY {
 
 impl Default for AlignmentX {
     fn default() -> Self {
-        AlignmentX::Center
+        AlignmentX::Left
     }
 }
 
 impl Default for AlignmentY {
     fn default() -> Self {
-        AlignmentY::Center
+        AlignmentY::Top
     }
 }
 

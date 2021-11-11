@@ -41,12 +41,13 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
     }
 
     fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
-        let max_width = self.final_width(available_space, text_renderer);
+        let max_width = self.contrainted_width(available_space);
         text_renderer.render_box(&self.btn.content, max_width, 1.0).total_height
     }
 
     fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
-        text_renderer.render_box(&self.btn.content, available_space.width, 1.0).total_width
+        let max_width = self.contrainted_width(available_space);
+        text_renderer.render_box(&self.btn.content, max_width, 1.0).total_width
     }
 
     fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
@@ -57,10 +58,10 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
         new_comp.base.coords.x = available_space.x;
         new_comp.base.coords.y = available_space.y;
 
-        let final_width = self.final_width(available_space, text_renderer);
+        let final_width = self.final_width(available_space, text_renderer, OnFill::Expand);
         new_comp.base.set_width(final_width);
 
-        let final_height = self.final_height(available_space, text_renderer);
+        let final_height = self.final_height(available_space, text_renderer, OnFill::Expand);
         new_comp.base.set_height(final_height);
 
         let btn: Component<Message> = new_comp.into();

@@ -22,7 +22,7 @@ use std::path::Path;
 
 #[derive(Debug, Clone, Copy)]
 enum Message {
-    Msg1
+    Add
 }
 
 
@@ -37,6 +37,7 @@ fn align_left() {
     let font = font::Font::load_fnt_font(font_path).unwrap();
     let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
 
+    let gl = &window.gl();
 
     let btn_width = 20;
     let spacing = 10;
@@ -49,7 +50,7 @@ fn align_left() {
         .add(Row::new()
              .width(Fill)
              .add_attribute(Attribute::Spacing(10.0))
-             .add(Button::new(&window.gl(), "Right", Some(Message::Msg1))
+             .add(Button::new(gl, "Right", Some(Message::Add))
                   .width(Px(btn_width as u32))
                   .align_left()
                   .height(Fill)));
@@ -77,7 +78,7 @@ fn align_right() {
     let font_path = Path::new("./assets/fonts/Arial.fnt");
     let font = font::Font::load_fnt_font(font_path).unwrap();
     let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
-
+    let gl = &window.gl();
 
     let btn_width = 20;
     let spacing = 10;
@@ -91,7 +92,7 @@ fn align_right() {
         .add(Row::new()
              .width(Fill)
              .add_attribute(Attribute::Spacing(10.0))
-             .add(Button::new(&window.gl(), "Right", Some(Message::Msg1))
+             .add(Button::new(gl, "Right", Some(Message::Add))
                   .width(Px(btn_width as u32))
                   .align_right()
                   .height(Fill)));
@@ -121,7 +122,7 @@ fn align_center() {
     let font_path = Path::new("./assets/fonts/Arial.fnt");
     let font = font::Font::load_fnt_font(font_path).unwrap();
     let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
-
+    let gl = &window.gl();
 
     let btn_width = 20;
     let spacing = 10;
@@ -134,7 +135,7 @@ fn align_center() {
         .add(Row::new()
              .width(Fill)
              .add_attribute(Attribute::Spacing(spacing as f32))
-             .add(Button::new(&window.gl(), "Right", Some(Message::Msg1))
+             .add(Button::new(gl, "Right", Some(Message::Add))
                   .width(Px(btn_width as u32))
                   .align_center()
                   .height(Fill)));
@@ -146,7 +147,95 @@ fn align_center() {
     node.add_to_container(&mut cont, &size, window.text_renderer());
     for (_, comp) in &cont.components {
         println!("{:?}",comp.base.coords.x);
-        assert_eq!(comp.base.coords.x as u32,  width/2 - (btn_width / 2 + spacing) as u32 );
+        assert_eq!(comp.base.coords.x as u32, width/2 - (btn_width / 2 + spacing) as u32 );
         assert_eq!(comp.base.coords.y as i32, spacing);
+    }
+}
+
+
+
+#[test]
+fn align_bottom_1() {
+
+    let width = 1000;
+    let height = 600;
+
+    let font_path = Path::new("./assets/fonts/Arial.fnt");
+    let font = font::Font::load_fnt_font(font_path).unwrap();
+    let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
+
+    let gl = &window.gl();
+
+    let btn_height = 40;
+    let spacing = 10;
+
+    let col = Column::new()
+        .width(Fill)
+        .height(Fill)
+        .padding(spacing as f32)
+        .spacing(spacing as f32)
+        .add(Row::new()
+             .width(Fill)
+             .height(FitContent)
+             .align_bottom()
+             .add_attribute(Attribute::Spacing(spacing as f32))
+             .add(Button::new(gl, "Right", Some(Message::Add))
+                  .height(Px(btn_height as u32))
+                  .align_left()
+             )
+        );
+
+
+    let node: Node<Message>  = col.into();
+    let size = RealizedSize { x: 0.0, y: 0.0, width: width as f32, height: height as f32};
+    let mut cont = ComponentContainer::new();
+    node.add_to_container(&mut cont, &size, window.text_renderer());
+    for (_, comp) in &cont.components {
+        assert_eq!(comp.base.coords.x as u32, spacing);
+        assert_eq!(comp.base.coords.y as u32, height - btn_height - spacing);
+    }
+}
+
+
+
+#[test]
+fn align_bottom_2() {
+
+    let width = 1000;
+    let height = 600;
+
+    let font_path = Path::new("./assets/fonts/Arial.fnt");
+    let font = font::Font::load_fnt_font(font_path).unwrap();
+    let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
+
+    let gl = &window.gl();
+
+    let btn_height = 40;
+    let spacing = 10;
+
+    let col = Row::new()
+        .width(Fill)
+        .height(Fill)
+        .padding(spacing as f32)
+        .spacing(spacing as f32)
+        .add(Column::new()
+             .width(Fill)
+             .height(FitContent)
+             .align_bottom()
+             .add_attribute(Attribute::Spacing(spacing as f32))
+             .add(Button::new(gl, "Right", Some(Message::Add))
+                  .height(Px(btn_height as u32))
+                  .align_left()
+             )
+        );
+
+
+    let node: Node<Message>  = col.into();
+    let size = RealizedSize { x: 0.0, y: 0.0, width: width as f32, height: height as f32};
+    let mut cont = ComponentContainer::new();
+    node.add_to_container(&mut cont, &size, window.text_renderer());
+    for (_, comp) in &cont.components {
+        assert_eq!(comp.base.coords.x as u32, spacing);
+        assert_eq!(comp.base.coords.y as u32, height - btn_height - spacing);
     }
 }

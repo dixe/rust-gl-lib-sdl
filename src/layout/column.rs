@@ -45,20 +45,21 @@ impl<'a, Message> Element<Message> for Column<'a, Message> {
     fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         let mut abs_height = 0.;
         for c in &self.children {
-            abs_height += c.content_height(available_space, text_renderer);
+            abs_height += c.final_height(available_space, text_renderer, OnFill::Shrink);
         }
 
+
+        let child_spacing_count = self.children.len().max(1) - 1;
         let spacing = self.attributes().spacing;
 
-        abs_height + self.children.len() as f32 * spacing.y
+        abs_height + child_spacing_count as f32 * spacing.y
     }
-
 
 
     fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         let mut abs_width = 0.;
         for c in &self.children {
-            abs_width += c.content_width(available_space, text_renderer);
+            abs_width += c.final_width(available_space, text_renderer, OnFill::Shrink);
         }
 
         abs_width
@@ -111,7 +112,7 @@ where Message: 'a {
     }
 
 
-    fn calculate_child_spaces(&self, update_info: &mut UpdateInfo) -> ChildSpaceInfo {
+    fn calculate_child_spaces(&self, update_info: &UpdateInfo) -> Vec<RealizedSize> {
 
         let text_renderer = update_info.text_renderer;
         let spacing = update_info.spacing;
@@ -124,6 +125,8 @@ where Message: 'a {
         let mut child_spaces = Vec::new();
         for child in &self.children {
             let mut child_space = *content_space;
+
+            child_space.x = child.final_width(&child_space, text_renderer, OnFill::Expand);
             child_space.y = next_y;
 
             match child.attributes().height {
@@ -131,27 +134,23 @@ where Message: 'a {
                     child_space.height = px as f32;
                 },
                 FitContent => {
-                    child_space.height = child.final_height(content_space, text_renderer);
+                    child_space.height = child.final_height(content_space, text_renderer, OnFill::Expand);
                 },
                 Fill => {
                     child_space.height = dynamic_height / fill_count as f32 ;
                 },
-                _ => unimplemented!(),
+                FillPortion(p) => {
+                    child_space.height = (dynamic_height / fill_count as f32) * p as f32;
+                },
             }
 
             next_y += child_space.height + spacing.y;
             child_spaces.push(child_space);
         }
 
+        println!("Cols CHild Spaces {:#?}", child_spaces);
 
-        ChildSpaceInfo {
-            child_spaces,
-            next: NextStart {
-                x: update_info.next.x,
-                y: next_y
-            }
-        }
-
+        child_spaces
     }
 
     fn children(&self) -> &Vec::<Node<Message>>  {

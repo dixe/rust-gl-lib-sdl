@@ -4,12 +4,6 @@ use crate::layout::attributes::{self, Length, LengthConstraint, Attributes, Attr
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use crate::layout::node::Node;
 
-#[derive(Debug, Clone, Copy)]
-pub enum OnFill {
-    Expand,
-    Shrink
-}
-
 pub trait Element<Message> {
 
     fn attributes(&self) -> &Attributes;
@@ -20,10 +14,24 @@ pub trait Element<Message> {
 
     fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer);
 
+    fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+        match self.attributes().height {
+            Length::Px(px) => {
+                px as f32
+            },
+            _ => {
+                self.desired_height()
+            }
+        }
 
-    fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
+        self.bounded_height(h)
+    }
 
-    fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer, on_fill: OnFill) -> f32 {
+    fn desired_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
+
+
+
+    fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
 
         let h = match self.attributes().height {
             Length::Px(px) => {
@@ -33,26 +41,41 @@ pub trait Element<Message> {
                 let ch = self.content_height(available_space, text_renderer);
                 ch
             },
-            _ => match on_fill {
-                OnFill::Expand => available_space.height,
-                OnFill::Shrink => self.content_height(available_space, text_renderer),
-            }
+            _ => {
+                available_space.height
+            },
         };
 
+        self.bounded_height(h)
+    }
+
+
+    fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+
+        match self.attributes().width {
+            Length::Px(px) => {
+                px as f32
+            },
+            _ => {
+                self.desired_height()
+            }
+        }
+    }
+
+    fn bounded_width(&self, height: f32) -> f32 {
 
         let attribs = self.attributes();
 
         let min = attribs.height_constraint.min();
         let max = attribs.height_constraint.max(available_space.height);
 
-        f32::min(max, f32::max(min, h))
+        f32::min(max, f32::max(min, height))
 
     }
 
+    fn desired_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
 
-    fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
-
-    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer, on_fill: OnFill) -> f32 {
+    fn final_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
 
         let w = match self.attributes().width {
             Length::Px(px) => {
@@ -61,10 +84,7 @@ pub trait Element<Message> {
             Length::FitContent => {
                 self.content_width(available_space, text_renderer)
             },
-            _ => match on_fill {
-                OnFill::Expand => available_space.width,
-                OnFill::Shrink => self.content_width(available_space, text_renderer),
-            }
+            _ => available_space.width,
         };
 
 
@@ -77,20 +97,7 @@ pub trait Element<Message> {
 
     }
 
-    fn contrainted_width(&self, available_space: &RealizedSize) -> f32 {
-
-        let w = match self.attributes().width {
-            Length::Px(px) => {
-                px as f32
-            },
-            _ => available_space.width
-        };
-
-        self.bounded_width(w, available_space)
-    }
-
-
-    fn bounded_width(&self, width: f32, available_space: &RealizedSize) -> f32 {
+    fn bounded_width(&self, width: f32) -> f32 {
 
         let attribs = self.attributes();
 
