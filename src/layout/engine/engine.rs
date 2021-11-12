@@ -17,25 +17,8 @@ pub fn align_tree<Message>(tree: &mut NodeWithSize<Message>) where Message: fmt:
     align_children(tree);
 
     for c in tree.children.iter_mut() {
-        align_tree_relative(c);
+        align_tree(c);
     }
-}
-
-
-
-fn align_tree_absolute<Message>(tree: &mut NodeWithSize<Message>) where Message: fmt::Debug {
-    let layout = &tree.layout;
-
-    // update children X to be parent + padding
-    for c in tree.children.iter_mut() {
-        c.layout.position.x = c.layout.position.x + layout.position.x;
-        c.layout.position.y = c.layout.position.y + layout.position.y;
-    }
-
-    for c in tree.children.iter_mut() {
-        align_tree_absolute(c);
-    }
-
 }
 
 
