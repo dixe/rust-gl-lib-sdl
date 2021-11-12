@@ -5,9 +5,9 @@ use super::*;
 use crate::layout::node::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use std::marker;
+use std::fmt;
 
-
-pub trait Container<Message>: Element<Message> {
+pub trait Container<Message>: Element<Message> where Message: fmt::Debug {
 
 
     fn children_height_info(&self, content_space: &RealizedSize, _text_renderer: &TextRenderer) -> ChildrenAbsAndFill<Height> {
@@ -105,7 +105,7 @@ pub trait Container<Message>: Element<Message> {
     }
 }
 
-fn align_child_spaces<'a, Message>(children: &Vec<Node<'a, Message>>, child_spaces: &mut Vec<RealizedSize>, used_space: &UsedSpace , content_space: &RealizedSize) {
+fn align_child_spaces<'a, Message>(children: &Vec<Node<'a, Message>>, child_spaces: &mut Vec<RealizedSize>, used_space: &UsedSpace , content_space: &RealizedSize) where Message: fmt::Debug {
 
 
     let unused_x = f32::max(0.0, content_space.width - used_space.w) ;
@@ -123,7 +123,7 @@ fn align_child_spaces<'a, Message>(children: &Vec<Node<'a, Message>>, child_spac
             println!("child_size {:?}", child_spaces[0]);
             println!("");
         },
-        _ => {}\
+        _ => {}
     };
 
 
@@ -143,7 +143,7 @@ fn align_child_spaces<'a, Message>(children: &Vec<Node<'a, Message>>, child_spac
 }
 
 
-fn align_child_spaces_x<'a, Message>(children: &Vec::<Node<'a, Message>>, child_spaces: &mut Vec::<RealizedSize>, content_width: f32, mut unused_x: f32) {
+fn align_child_spaces_x<'a, Message>(children: &Vec::<Node<'a, Message>>, child_spaces: &mut Vec::<RealizedSize>, content_width: f32, mut unused_x: f32) where Message: fmt::Debug {
     let mut center_elements_left = None;
     let mut center_elements_right = 0.0;
 
@@ -214,7 +214,7 @@ fn align_child_spaces_x<'a, Message>(children: &Vec::<Node<'a, Message>>, child_
 }
 
 
-fn align_child_spaces_y<'a, Message>(children: &Vec::<Node<'a, Message>>, child_spaces: &mut Vec::<RealizedSize>, content_height: f32, mut unused_y: f32) {
+fn align_child_spaces_y<'a, Message>(children: &Vec::<Node<'a, Message>>, child_spaces: &mut Vec::<RealizedSize>, content_height: f32, mut unused_y: f32) where Message: fmt::Debug {
     let mut center_elements_top = None;
     let mut center_elements_bottom = 0.0;
 

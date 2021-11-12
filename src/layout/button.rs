@@ -7,7 +7,7 @@ use crate::layout::element::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::gl;
 use crate::layout::node::*;
-
+use std::fmt;
 
 #[derive(Clone, Debug)]
 pub struct Button<Message> {
@@ -16,7 +16,7 @@ pub struct Button<Message> {
     on_click_msg: Option<Message>
 }
 
-impl<Message> Button<Message> where Message: Clone {
+impl<Message> Button<Message> where Message: Clone + fmt::Debug {
     pub fn new(gl: &gl::Gl, content: &str, msg: Option<Message>) -> Self {
 
         let btn = comp_btn::Button::new(gl, content, msg.clone());
@@ -30,7 +30,7 @@ impl<Message> Button<Message> where Message: Clone {
 }
 
 
-impl<Message> Element<Message> for Button<Message> where Message: Clone {
+impl<Message> Element<Message> for Button<Message> where Message: Clone + fmt::Debug{
 
     fn attributes(&self) -> &Attributes {
         &self.attributes
@@ -42,7 +42,9 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
 
     fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         let max_width = self.contrainted_width(available_space);
-        text_renderer.render_box(&self.btn.content, max_width, 1.0).total_height
+        let h = text_renderer.render_box(&self.btn.content, max_width, 1.0).total_height;
+        println!("Button height = {:?}", h);
+        h
     }
 
     fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
@@ -69,12 +71,17 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone {
         container.add_component(btn);
 
     }
+
+    fn pop_children_front(&mut self) -> Option<Node<Message>> where Message: fmt::Debug {
+        None
+    }
+
 }
 
 
 impl<'a, Message> From<Button<Message>> for Node<'a, Message>
 where
-    Message: Clone + 'a {
+    Message: Clone + fmt::Debug + 'a  {
 
     fn from(button: Button<Message>) -> Node<'a, Message> {
         Node {

@@ -6,7 +6,7 @@ use sdl2;
 use crate::components::container::ComponentContainer;
 use crate::state::State;
 use crate::layout::element::Element;
-
+use std::fmt;
 
 /// Struct given to component handlers to change things about the window.
 pub struct WindowComponentAccess {
@@ -48,7 +48,7 @@ pub struct SdlGlWindow<Message> {
 
 
 
-impl<Message> SdlGlWindow<Message> where Message: Clone {
+impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
 
     pub fn new(window_text: &str, width: u32, height: u32, font: font::Font ) -> Result<Self, failure::Error> {
         let sdl = sdl2::init().unwrap();

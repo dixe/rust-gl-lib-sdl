@@ -1,24 +1,25 @@
 use crate::components::container::*;
-use crate::layout::attributes::{*, Length::*};
+use crate::layout::attributes::{*};
 use crate::layout::element::*;
 use crate::layout::node::*;
 use super::*;
-use crate::layout::container::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
-use std::marker;
+use std::collections::VecDeque;
+use std::fmt;
 
-pub struct Column<'a, Message> {
-    children: Vec::<Node<'a, Message>>,
+#[derive(Debug)]
+pub struct Column<'a, Message> where Message: fmt::Debug {
+    children: VecDeque::<Node<'a, Message>>,
     attributes: Attributes
 }
 
 
-impl<'a, Message> Column<'a, Message> {
+impl<'a, Message> Column<'a, Message> where Message: fmt::Debug {
 
     pub fn new() -> Self {
 
         Column {
-            children: Vec::new(),
+            children: VecDeque::new(),
             attributes: Default::default(),
         }
     }
@@ -26,13 +27,13 @@ impl<'a, Message> Column<'a, Message> {
     pub fn add<E>(mut self, el: E) -> Self
     where
         E: Into<Node<'a, Message>> {
-        self.children.push(el.into());
+        self.children.push_back(el.into());
         self
     }
 }
 
 
-impl<'a, Message> Element<Message> for Column<'a, Message> {
+impl<'a, Message> Element<Message> for Column<'a, Message> where Message: fmt::Debug {
 
     fn attributes(&self) -> &Attributes {
         &self.attributes
@@ -52,7 +53,11 @@ impl<'a, Message> Element<Message> for Column<'a, Message> {
         let child_spacing_count = self.children.len().max(1) - 1;
         let spacing = self.attributes().spacing;
 
-        abs_height + child_spacing_count as f32 * spacing.y
+        let h = abs_height + child_spacing_count as f32 * spacing.y;
+
+        println!("Col height {:?}", h);
+
+        h
     }
 
 
@@ -70,15 +75,22 @@ impl<'a, Message> Element<Message> for Column<'a, Message> {
             return;
         }
 
-        self.add_children_to_container(container, available_space, text_renderer);
+        //self.add_children_to_container(container, available_space, text_renderer);
 
         return;
+    }
+
+    fn pop_children_front(&mut self) -> Option<Node<Message>> {
+        let child = self.children.pop_front();
+
+        println!("Col child {:#?}", child);
+        child
     }
 }
 
 impl<'a, Message> From<Column<'a, Message>> for Node<'a, Message>
 where
-    Message: 'a {
+    Message: fmt::Debug + 'a {
 
     fn from(column: Column<'a, Message>) -> Node<'a, Message> {
         Node {
@@ -87,20 +99,20 @@ where
     }
 }
 
-
+/*
 impl<'a, Message> Container<Message> for Column<'a, Message>
 where Message: 'a {
 
-    fn children_height_info(&self, content_space: &RealizedSize, text_renderer: &TextRenderer) -> ChildrenAbsAndFill<Height> {
+fn children_height_info(&self, content_space: &RealizedSize, text_renderer: &TextRenderer) -> ChildrenAbsAndFill<Height> {
 
-        let mut abs_height = 0.;
-        let mut fill_count = 0;
-        for c in &self.children {
-            match c.attributes().height {
-                Px(px) => { abs_height += px as f32; },
-                FitContent => { abs_height += c.content_height(content_space, text_renderer); },
-                Fill => { fill_count += 1; }
-                FillPortion(x) => { fill_count += x; }
+let mut abs_height = 0.;
+let mut fill_count = 0;
+for c in &self.children {
+match c.attributes().height {
+Px(px) => { abs_height += px as f32; },
+FitContent => { abs_height += c.content_height(content_space, text_renderer); },
+Fill => { fill_count += 1; }
+FillPortion(x) => { fill_count += x; }
             }
         }
         ChildrenAbsAndFill::<Height> {
@@ -126,7 +138,7 @@ where Message: 'a {
         for child in &self.children {
             let mut child_space = *content_space;
 
-            child_space.x = child.final_width(&child_space, text_renderer, OnFill::Expand);
+            child_space.width = child.final_width(&child_space, text_renderer, OnFill::Expand);
             child_space.y = next_y;
 
             match child.attributes().height {
@@ -154,7 +166,9 @@ where Message: 'a {
     }
 
     fn children(&self) -> &Vec::<Node<Message>>  {
-        &self.children
+        &self.children.clone().into()
     }
 
 }
+
+*/

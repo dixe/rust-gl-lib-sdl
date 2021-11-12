@@ -1,25 +1,25 @@
 use crate::components::container::*;
-use crate::layout::attributes::{*, Length::*};
+use crate::layout::attributes::{*};
 use crate::layout::element::*;
 use super::*;
 use crate::layout::node::*;
-use crate::layout::container::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
-use std::marker;
+use std::collections::VecDeque;
+use std::fmt;
 
-
-pub struct Row<'a, Message> {
-    children: Vec::<Node<'a, Message>>,
+#[derive(Debug)]
+pub struct Row<'a, Message> where Message: fmt::Debug {
+    children: VecDeque::<Node<'a, Message>>,
     attributes: Attributes
 }
 
 
-impl<'a, Message> Row<'a, Message> {
+impl<'a, Message> Row<'a, Message> where Message: fmt::Debug {
 
 
     pub fn new() -> Self {
         Self {
-            children: Vec::new(),
+            children: VecDeque::new(),
             attributes: Default::default(),
         }
     }
@@ -27,13 +27,13 @@ impl<'a, Message> Row<'a, Message> {
     pub fn add<E>(mut self, el: E) -> Self
     where
         E: Into<Node<'a, Message>> {
-        self.children.push(el.into());
+        self.children.push_back(el.into());
         self
     }
 }
 
 
-impl<'a, Message> Element<Message> for Row<'a, Message> {
+impl<'a, Message> Element<Message> for Row<'a, Message> where Message: fmt::Debug {
 
     fn attributes(&self) -> &Attributes {
         &self.attributes
@@ -70,7 +70,11 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
             return;
         }
 
-        self.add_children_to_container(container, available_space, text_renderer);
+        //self.add_children_to_container(container, available_space, text_renderer);
+    }
+
+    fn pop_children_front(&mut self) -> Option<Node<Message>> {
+        self.children.pop_front()
     }
 }
 
@@ -78,7 +82,7 @@ impl<'a, Message> Element<Message> for Row<'a, Message> {
 
 impl<'a, Message> From<Row<'a, Message>> for Node<'a, Message>
 where
-    Message: 'a {
+    Message: fmt::Debug + 'a {
 
 
     fn from(row: Row<'a, Message>) -> Node<'a, Message> {
@@ -88,20 +92,21 @@ where
     }
 }
 
+/*
 
 impl<'a, Message> Container<Message> for Row<'a, Message>
 where Message: 'a {
 
-    fn children_width_info(&self, content_space: &RealizedSize, text_renderer: &TextRenderer) -> ChildrenAbsAndFill<Width> {
+fn children_width_info(&self, content_space: &RealizedSize, text_renderer: &TextRenderer) -> ChildrenAbsAndFill<Width> {
 
-        let mut abs_width = 0.;
-        let mut fill_count = 0;
-        for c in &self.children {
-            match c.attributes().width {
-                Px(px) => { abs_width += px as f32; },
-                FitContent => { abs_width += c.final_width(content_space, text_renderer, OnFill::Expand); },
-                Fill => { fill_count += 1; }
-                FillPortion(x) => { fill_count += x; }
+let mut abs_width = 0.;
+let mut fill_count = 0;
+for c in &self.children {
+match c.attributes().width {
+Px(px) => { abs_width += px as f32; },
+FitContent => { abs_width += c.final_width(content_space, text_renderer, OnFill::Expand); },
+Fill => { fill_count += 1; }
+FillPortion(x) => { fill_count += x; }
             }
         }
         ChildrenAbsAndFill::<Width> {
@@ -128,7 +133,7 @@ where Message: 'a {
         for child in &self.children {
 
             let mut child_space = *content_space;
-            child_space.x = next_x;
+            child_space.height = child.final_height(&child_space, text_renderer, OnFill::Expand);
 
             match child.attributes().width {
                 Px(px) => {
@@ -155,7 +160,8 @@ where Message: 'a {
     }
 
     fn children(&self) -> &Vec::<Node<Message>>  {
-        &self.children
+        &self.children.into()
     }
 
 }
+*/

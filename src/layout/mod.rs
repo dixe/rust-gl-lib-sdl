@@ -14,6 +14,10 @@ pub mod node;
 
 pub mod container;
 
+
+
+
+
 #[derive(Debug,Clone, Copy)]
 pub struct RealizedSize {
     pub x: f32,
@@ -32,7 +36,21 @@ impl From<&viewport::Viewport> for RealizedSize {
             width: viewport.w as f32,
             height: viewport.h as f32
         }
+    }
+}
+
+
+pub mod engine;
+
+
+impl From<engine::Size> for RealizedSize {
+    fn from(size: engine::Size) -> Self {
+        Self {
+            x: 0.0,
+            y: 0.0,
+            width: size.w,
+            height: size.h
+        }
 
     }
-
 }

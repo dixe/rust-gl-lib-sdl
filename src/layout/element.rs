@@ -1,8 +1,9 @@
 use super::*;
 use crate::components::container::*;
-use crate::layout::attributes::{self, Length, LengthConstraint, Attributes, Attribute, AlignmentY, AlignmentX, Spacing};
+use crate::layout::attributes::{self, Length, LengthConstraint, Attributes, Attribute, AlignmentY, AlignmentX};
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use crate::layout::node::Node;
+use std::fmt;
 
 #[derive(Debug, Clone, Copy)]
 pub enum OnFill {
@@ -10,7 +11,9 @@ pub enum OnFill {
     Shrink
 }
 
-pub trait Element<Message> {
+pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
+
+
 
     fn attributes(&self) -> &Attributes;
 
@@ -49,6 +52,7 @@ pub trait Element<Message> {
 
     }
 
+    fn pop_children_front(&mut self) -> Option<Node<Message>>;
 
     fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
 

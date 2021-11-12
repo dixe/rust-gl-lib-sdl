@@ -3,14 +3,14 @@ use crate::layout::attributes::Attributes;
 use crate::layout::element::*;
 use super::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
+use std::fmt;
 
-
-pub struct Node<'a, Message> {
+#[derive(Debug)]
+pub struct Node<'a, Message> where Message: fmt::Debug {
     pub(crate) element: Box<dyn Element<Message> + 'a>,
 }
 
-
-impl<'a, Message> Element<Message> for Node<'a, Message> {
+impl<'a, Message> Element<Message> for Node<'a, Message> where Message: fmt::Debug {
     fn attributes(&self) -> &Attributes {
         self.element.attributes()
     }
@@ -31,6 +31,10 @@ impl<'a, Message> Element<Message> for Node<'a, Message> {
 
     fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         self.element.content_width(available_space, text_renderer)
+    }
+
+    fn pop_children_front(&mut self) -> Option<Node<Message>> {
+        self.element.pop_children_front()
     }
 
 }
