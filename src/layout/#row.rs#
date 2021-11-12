@@ -100,7 +100,7 @@ where
     }
 }
 
-/*
+
 
 impl<Message> Container<Message> for Row<Message>
 where Message: 'a {
@@ -172,4 +172,4 @@ FillPortion(x) => { fill_count += x; }
     }
 
 }
-*/
+

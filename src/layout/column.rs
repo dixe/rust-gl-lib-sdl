@@ -8,13 +8,13 @@ use std::collections::VecDeque;
 use std::fmt;
 
 #[derive(Debug)]
-pub struct Column<'a, Message> where Message: fmt::Debug {
-    children: VecDeque::<Node<'a, Message>>,
+pub struct Column<Message> where Message: fmt::Debug {
+    children: VecDeque::<Node<Message>>,
     attributes: Attributes
 }
 
 
-impl<'a, Message> Column<'a, Message> where Message: fmt::Debug {
+impl<Message> Column<Message> where Message: fmt::Debug {
 
     pub fn new() -> Self {
 
@@ -26,14 +26,28 @@ impl<'a, Message> Column<'a, Message> where Message: fmt::Debug {
 
     pub fn add<E>(mut self, el: E) -> Self
     where
-        E: Into<Node<'a, Message>> {
+        E: Into<Node<Message>> {
         self.children.push_back(el.into());
         self
     }
 }
 
 
-impl<'a, Message> Element<Message> for Column<'a, Message> where Message: fmt::Debug {
+impl<Message> Element<Message> for Column<Message> where Message: fmt::Debug {
+
+    fn name(&self) -> &str {
+        "column"
+    }
+
+    fn width_children(&self) -> i32 {
+        self.children.len() as i32
+    }
+
+
+    fn distribution_dir(&self) -> Direction {
+        Direction::Y
+    }
+
 
     fn attributes(&self) -> &Attributes {
         &self.attributes
@@ -54,8 +68,6 @@ impl<'a, Message> Element<Message> for Column<'a, Message> where Message: fmt::D
         let spacing = self.attributes().spacing;
 
         let h = abs_height + child_spacing_count as f32 * spacing.y;
-
-        println!("Col height {:?}", h);
 
         h
     }
@@ -81,18 +93,15 @@ impl<'a, Message> Element<Message> for Column<'a, Message> where Message: fmt::D
     }
 
     fn pop_children_front(&mut self) -> Option<Node<Message>> {
-        let child = self.children.pop_front();
-
-        println!("Col child {:#?}", child);
-        child
+        self.children.pop_front()
     }
 }
 
-impl<'a, Message> From<Column<'a, Message>> for Node<'a, Message>
+impl<Message: 'static> From<Column<Message>> for Node<Message>
 where
-    Message: fmt::Debug + 'a {
+    Message: fmt::Debug  {
 
-    fn from(column: Column<'a, Message>) -> Node<'a, Message> {
+    fn from(column: Column<Message>) -> Node<Message> {
         Node {
             element: Box::new(column)
         }
@@ -100,7 +109,7 @@ where
 }
 
 /*
-impl<'a, Message> Container<Message> for Column<'a, Message>
+impl<Message> Container<Message> for Column<Message>
 where Message: 'a {
 
 fn children_height_info(&self, content_space: &RealizedSize, text_renderer: &TextRenderer) -> ChildrenAbsAndFill<Height> {
@@ -169,6 +178,6 @@ FillPortion(x) => { fill_count += x; }
         &self.children.clone().into()
     }
 
-}
 
+}
 */

@@ -32,7 +32,6 @@ pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
 
     fn distribution_dir(&self) -> Direction {
         Direction::X
-
     }
 
     fn attributes(&self) -> &Attributes;

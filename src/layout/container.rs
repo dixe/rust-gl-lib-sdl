@@ -105,7 +105,7 @@ pub trait Container<Message>: Element<Message> where Message: fmt::Debug {
     }
 }
 
-fn align_child_spaces<'a, Message>(children: &Vec<Node<'a, Message>>, child_spaces: &mut Vec<RealizedSize>, used_space: &UsedSpace , content_space: &RealizedSize) where Message: fmt::Debug {
+fn align_child_spaces<Message>(children: &Vec<Node<Message>>, child_spaces: &mut Vec<RealizedSize>, used_space: &UsedSpace , content_space: &RealizedSize) where Message: fmt::Debug {
 
 
     let unused_x = f32::max(0.0, content_space.width - used_space.w) ;
@@ -143,7 +143,7 @@ fn align_child_spaces<'a, Message>(children: &Vec<Node<'a, Message>>, child_spac
 }
 
 
-fn align_child_spaces_x<'a, Message>(children: &Vec::<Node<'a, Message>>, child_spaces: &mut Vec::<RealizedSize>, content_width: f32, mut unused_x: f32) where Message: fmt::Debug {
+fn align_child_spaces_x<Message>(children: &Vec::<Node<Message>>, child_spaces: &mut Vec::<RealizedSize>, content_width: f32, mut unused_x: f32) where Message: fmt::Debug {
     let mut center_elements_left = None;
     let mut center_elements_right = 0.0;
 
@@ -214,7 +214,7 @@ fn align_child_spaces_x<'a, Message>(children: &Vec::<Node<'a, Message>>, child_
 }
 
 
-fn align_child_spaces_y<'a, Message>(children: &Vec::<Node<'a, Message>>, child_spaces: &mut Vec::<RealizedSize>, content_height: f32, mut unused_y: f32) where Message: fmt::Debug {
+fn align_child_spaces_y<Message>(children: &Vec::<Node<Message>>, child_spaces: &mut Vec::<RealizedSize>, content_height: f32, mut unused_y: f32) where Message: fmt::Debug {
     let mut center_elements_top = None;
     let mut center_elements_bottom = 0.0;
 

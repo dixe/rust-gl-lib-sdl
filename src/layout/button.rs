@@ -32,6 +32,9 @@ impl<Message> Button<Message> where Message: Clone + fmt::Debug {
 
 impl<Message> Element<Message> for Button<Message> where Message: Clone + fmt::Debug{
 
+    fn name(&self) -> &str {
+        "button"
+    }
     fn attributes(&self) -> &Attributes {
         &self.attributes
     }
@@ -42,9 +45,8 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone + fmt::D
 
     fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         let max_width = self.contrainted_width(available_space);
-        let h = text_renderer.render_box(&self.btn.content, max_width, 1.0).total_height;
-        println!("Button height = {:?}", h);
-        h
+        text_renderer.render_box(&self.btn.content, max_width, 1.0).total_height
+
     }
 
     fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
@@ -79,11 +81,11 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone + fmt::D
 }
 
 
-impl<'a, Message> From<Button<Message>> for Node<'a, Message>
+impl<Message: 'static> From<Button<Message>> for Node<Message>
 where
-    Message: Clone + fmt::Debug + 'a  {
+    Message: Clone + fmt::Debug   {
 
-    fn from(button: Button<Message>) -> Node<'a, Message> {
+    fn from(button: Button<Message>) -> Node<Message> {
         Node {
             element: Box::new(button)
         }

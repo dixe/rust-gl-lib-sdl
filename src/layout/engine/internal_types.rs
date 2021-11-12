@@ -1,0 +1,81 @@
+use super::*;
+
+#[derive(Debug)]
+pub struct NodeWithSize<Message> where Message: fmt::Debug {
+    pub node: Node<Message>,
+    pub layout: LayoutElement,
+    pub children: Vec<NodeWithSize<Message>>
+}
+
+
+impl From<LayoutElement> for RealizedSize {
+    fn from(layout: LayoutElement) -> Self {
+        Self {
+            x: layout.position.x,
+            y: layout.position.y,
+            width: layout.content_size.w,
+            height: layout.content_size.h
+        }
+
+    }
+}
+
+
+
+/// Almost the same as a regular length, except that Fit Content has been calculated to a px value
+#[derive(Debug, Clone, Copy)]
+pub enum EngineLength {
+    /// Length equal to given number of pixels
+    Px(f32),
+
+    /// Fill a portion
+    /// If 1 child has FillPortion 1 and another has FillPortion 3
+    /// Than the first child will have 1/4 of the space and the other child the
+    /// remainin 3/4
+    FillPortion(f32),
+}
+
+
+#[derive(Debug, Clone, Copy)]
+pub struct EngineAttributes {
+    pub width: EngineLength,
+    pub height: EngineLength,
+    pub width_constraint: LengthConstraint,
+    pub height_constraint: LengthConstraint,
+    pub align: Alignment,
+    pub padding: Padding,
+    pub spacing: Spacing,
+    pub width_children: i32,
+    pub height_children: i32,
+}
+
+
+
+
+#[derive(Debug, Clone, Copy)]
+pub struct LayoutElement {
+    pub attributes: EngineAttributes,
+    pub content_size: Size,
+    pub position: Point,
+}
+
+impl LayoutElement {
+
+    pub fn new(width:EngineLength, height: EngineLength, attributes: attributes::Attributes, content_size: Size, width_children: i32, height_children: i32) -> Self {
+        Self {
+            attributes: EngineAttributes {
+                width,
+                height,
+                width_constraint: attributes.width_constraint,
+                height_constraint: attributes.height_constraint,
+                align: attributes.align,
+                padding: attributes.padding,
+                spacing: attributes.spacing,
+                width_children,
+                height_children
+            },
+            content_size,
+            position: Point::default(),
+        }
+    }
+}

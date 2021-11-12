@@ -6,11 +6,16 @@ use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use std::fmt;
 
 #[derive(Debug)]
-pub struct Node<'a, Message> where Message: fmt::Debug {
-    pub(crate) element: Box<dyn Element<Message> + 'a>,
+pub struct Node<Message> where Message: fmt::Debug {
+    pub(crate) element: Box<dyn Element<Message>>,
 }
 
-impl<'a, Message> Element<Message> for Node<'a, Message> where Message: fmt::Debug {
+impl<Message> Element<Message> for Node<Message> where Message: fmt::Debug {
+
+    fn name(&self) -> &str {
+        self.element.name()
+    }
+
     fn attributes(&self) -> &Attributes {
         self.element.attributes()
     }

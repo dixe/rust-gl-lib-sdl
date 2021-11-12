@@ -45,6 +45,7 @@ struct World {
 
 impl gls::State<Message> for World {
 
+
     fn handle_message(&mut self, message: &Message, _window_access: &gls::window::WindowComponentAccess) {
 
         match message {
