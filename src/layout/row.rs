@@ -1,4 +1,3 @@
-use crate::components::container::*;
 use crate::layout::attributes::{*};
 use crate::layout::element::*;
 use super::*;
@@ -35,8 +34,8 @@ impl<Message> Row<Message> where Message: fmt::Debug {
 
 impl<Message> Element<Message> for Row<Message> where Message: fmt::Debug {
 
-    fn name(&self) -> &str {
-        "row"
+    fn name(&self) -> String {
+        "row".to_string()
     }
     fn width_children(&self) -> i32 {
         self.children.len() as i32
@@ -72,15 +71,6 @@ impl<Message> Element<Message> for Row<Message> where Message: fmt::Debug {
         abs_width
     }
 
-    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
-
-        if self.children.len() == 0 {
-            return;
-        }
-
-        //self.add_children_to_container(container, available_space, text_renderer);
-    }
-
     fn pop_children_front(&mut self) -> Option<Node<Message>> {
         self.children.pop_front()
     }
@@ -94,14 +84,12 @@ where
 
 
     fn from(row: Row<Message>) -> Node<Message> {
-        Node {
-            element: Box::new(row)
-        }
+        Box::new(row)
     }
 }
 
-/*
 
+/*
 impl<Message> Container<Message> for Row<Message>
 where Message: 'a {
 

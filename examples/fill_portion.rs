@@ -70,14 +70,14 @@ impl gls::State<Message> for World {
             .add(Row::new()
                  .width(Fill)
                  .add_attribute(Attribute::Spacing(10.0))
-                 .add(Button::new(gl, "Add", Some(Message::Add))
+                 .add(Button::new( "Add", Some(Message::Add))
                       .width(FillPortion(3)))
-                 .add(Button::new(gl, "Sub", Some(Message::Sub))
+                 .add(Button::new( "Sub", Some(Message::Sub))
                       .width(Fill)))
-            .add(Button::new(gl, "Clear", Some(Message::Clear))
+            .add(Button::new( "Clear", Some(Message::Clear))
                  .width(Fill)
                  .height(Px(50)))
-            .add(Button::new(gl, &format!("Total = {}", self.total), {
+            .add(Button::new( &format!("Total = {}", self.total), {
                 if self.total < 3 {
                     None
                 }

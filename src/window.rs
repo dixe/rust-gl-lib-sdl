@@ -5,7 +5,7 @@ use deltatime;
 use sdl2;
 use crate::components::container::ComponentContainer;
 use crate::state::State;
-use crate::layout::element::Element;
+use crate::layout::engine;
 use std::fmt;
 
 /// Struct given to component handlers to change things about the window.
@@ -137,7 +137,10 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
         if self.container_dirty {
             let mut cont = ComponentContainer::new();
             let size = (&self.viewport).into();
-            state.view(&self.gl).add_to_container(&mut cont, &size, &self.text_renderer);
+            let aligned_tree = engine::align_tree(state.view(&self.gl), size, &self.text_renderer);
+
+            engine::add_tree_to_container(&self.gl, &mut cont, &aligned_tree);
+
             self.container = cont;
             self.container_dirty = false;
             // Handle keeping hover

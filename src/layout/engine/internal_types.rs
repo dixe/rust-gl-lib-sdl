@@ -45,8 +45,8 @@ pub struct EngineAttributes {
     pub align: Alignment,
     pub padding: Padding,
     pub spacing: Spacing,
-    pub width_children: i32,
-    pub height_children: i32,
+    pub children_width_count: i32,
+    pub children_height_count: i32,
 }
 
 
@@ -61,7 +61,7 @@ pub struct LayoutElement {
 
 impl LayoutElement {
 
-    pub fn new(width:EngineLength, height: EngineLength, attributes: attributes::Attributes, content_size: Size, width_children: i32, height_children: i32) -> Self {
+    pub fn new(width:EngineLength, height: EngineLength, attributes: attributes::Attributes, content_size: Size, children_width_count: i32, children_height_count: i32) -> Self {
         Self {
             attributes: EngineAttributes {
                 width,
@@ -71,8 +71,8 @@ impl LayoutElement {
                 align: attributes.align,
                 padding: attributes.padding,
                 spacing: attributes.spacing,
-                width_children,
-                height_children
+                children_width_count,
+                children_height_count
             },
             content_size,
             position: Point::default(),

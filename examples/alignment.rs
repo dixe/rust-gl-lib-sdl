@@ -45,7 +45,7 @@ struct World {
 
 impl gls::State<Message> for World {
 
-    fn handle_message(&mut self, message: &Message, _window_access: &gls::window::WindowComponentAccess) {
+    fn handle_message(&mut self, message: &Message, window_access: &gls::window::WindowComponentAccess) {
 
         match message {
             Message::Add => { self.total += 1; },
@@ -72,41 +72,41 @@ impl gls::State<Message> for World {
             .add(Row::new()
                  .width(Fill)
                  .add_attribute(Attribute::Spacing(10.0))
-                 .add(Button::new(gl, "Add", Some(Message::Add))
+                 .add(Button::new( "Add", Some(Message::Add))
                       .align_left()
                       .height(Fill))
-                 .add(Button::new(gl, "Center 1", Some(Message::Clear))
+                 .add(Button::new( "Center 1", Some(Message::Clear))
                       .width(Px(100))
                       .align_center())
 
-                 .add(Button::new(gl, "Center 2", Some(Message::Clear))
+                 .add(Button::new( "Center 2", Some(Message::Clear))
                       .width(Px(100))
                       .align_center())
 
-                 .add(Button::new(gl, "Center 3", Some(Message::Clear))
+                 .add(Button::new( "Center 3", Some(Message::Clear))
                       .width(Px(100))
                       .align_center())
 
-                 .add(Button::new(gl, "Center 4", Some(Message::Clear))
+                 .add(Button::new( "Center 4", Some(Message::Clear))
                       .width(Px(100))
                       .align_center())
 
-                 .add(Button::new(gl, "Sub", Some(Message::Sub))
+                 .add(Button::new( "Sub", Some(Message::Sub))
                       .align_right()))
             .add(Row::new()
                  .width(Fill)
                  .add_attribute(Attribute::Spacing(10.0))
 
-                 .add(Button::new(gl, "Row 2 Center", Some(Message::Clear))
+                 .add(Button::new( "Row 2 Center", Some(Message::Clear))
                       .width(Px(100))
                       .align_center())
 
                  .align_right())
-            .add(Button::new(gl, "Clear ", Some(Message::Clear))
+            .add(Button::new( "Clear ", Some(Message::Clear))
                  .width(Px(100))
                  .height(Px(50))
                  .align_center())
-            .add(Button::new(gl, &format!("Total = {}", self.total), {
+            .add(Button::new( &format!("Total = {}", self.total), {
                 if self.total < 3 {
                     None
                 }

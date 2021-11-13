@@ -73,7 +73,7 @@ impl gls::State<Message> for World {
             .add(Row::new()
                  .width(Fill)
                  .add_attribute(Attribute::Spacing(10.0))
-                 .add(Button::new(gl, "Center 1", Some(Message::Add))
+                 .add(Button::new( "Center 1", Some(Message::Add))
                       .width(Px(100))
                       .height(Px(100))
                  )

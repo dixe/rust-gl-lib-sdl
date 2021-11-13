@@ -76,7 +76,7 @@ impl gls::State<Message> for World {
 
         use Length::*;
 
-        Button::new(gl, &format!("Toogle") ,Some(Message::Toogle))
+        Button::new( &format!("Toogle") ,Some(Message::Toogle))
             .width(Px(100))
             .height(Px(60))
             .into()

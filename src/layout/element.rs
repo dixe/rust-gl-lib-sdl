@@ -1,7 +1,8 @@
 use super::*;
-use crate::components::container::*;
+use crate::components::base::*;
 use crate::layout::attributes::{self, Length, LengthConstraint, Attributes, Attribute, AlignmentY, AlignmentX};
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
+use gl_lib::gl;
 use crate::layout::node::Node;
 use std::fmt;
 
@@ -20,7 +21,7 @@ pub enum Direction {
 pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
 
 
-    fn name(&self) -> &str;
+    fn name(&self) -> String;
 
     fn height_children(&self) -> i32 {
         0
@@ -32,7 +33,6 @@ pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
 
     fn distribution_dir(&self) -> Direction {
         Direction::X
-
     }
 
     fn attributes(&self) -> &Attributes;
@@ -40,8 +40,9 @@ pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
 
     fn attributes_mut(&mut self) -> &mut Attributes;
 
-    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer);
-
+    fn create_component(&self, _gl: &gl::Gl, _comp_base: ComponentBase) -> Option<Component<Message>> {
+        None
+    }
 
     fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32;
 
@@ -60,7 +61,6 @@ pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
                 OnFill::Shrink => self.content_height(available_space, text_renderer),
             }
         };
-
 
         let attribs = self.attributes();
 
@@ -149,9 +149,7 @@ pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
         self.add_attribute(Attribute::Spacing(s))
     }
 
-
     fn align_center(self) -> Self where Self: Sized {
-        println!("Set center {:?}",  self.name());
         self.add_attribute(Attribute::AlignmentX(AlignmentX::Center))
             .add_attribute(Attribute::AlignmentY(AlignmentY::Center))
     }

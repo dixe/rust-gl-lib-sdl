@@ -2,7 +2,8 @@ use crate::layout::attributes::{self, LengthConstraint, Alignment, Padding, Spac
 use super::*;
 use crate::layout::node::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
-use crate::layout::element::Element;
+use gl_lib::gl;
+use crate::components::container;
 use std::fmt;
 
 
@@ -30,6 +31,18 @@ pub fn align_tree<Message>(root: Node<Message>, output_size: Size, text_renderer
 
 }
 
+pub fn add_tree_to_container<Message>(gl: &gl::Gl, container: &mut container::ComponentContainer<Message>, elements: &Vec::<AlignedElement<Message>>) where Message: fmt::Debug + Clone {
+
+    for e in elements {
+        let base = e.realized_size.into();
+        if let Some(comp) = e.node.create_component(gl, base) {
+            container.add_component(comp);
+        }
+
+    }
+
+}
+
 fn map_size_to_aligned<Message>(mut sized_node: NodeWithSize<Message>, elements: &mut Vec::<AlignedElement<Message>>) where Message: fmt::Debug {
 
     while let Some(child) = sized_node.children.pop() {
@@ -49,7 +62,6 @@ fn get_sized_tree<Message>(mut node: Node<Message>, available_space: Size, text_
 
     let attribs = *node.attributes();
     let padding = attribs.padding;
-    let spacing = attribs.spacing;
 
     let content_size = Size {
         w: final_width(&node, &attribs, available_space, text_renderer, OnFill::Expand) - padding.right - padding.left,
@@ -147,4 +159,15 @@ pub struct Point {
 pub struct Size {
     pub w: f32,
     pub h: f32
+}
+
+
+impl From<&viewport::Viewport> for Size {
+
+    fn from(viewport: &viewport::Viewport) -> Self {
+        Self {
+            w: viewport.w as f32,
+            h: viewport.h as f32
+        }
+    }
 }

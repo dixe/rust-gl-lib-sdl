@@ -64,7 +64,6 @@ impl gls::State<Message> for World {
 
         use Length::*;
 
-        let btn_width = 20;
         let btn_height = 40;
         let spacing = 10;
         let col = Row::new()
@@ -77,7 +76,7 @@ impl gls::State<Message> for World {
                  .height(FitContent)
                  .align_bottom()
                  .add_attribute(Attribute::Spacing(spacing as f32))
-                 .add(Button::new(gl, "Right", Some(Message::Add))
+                 .add(Button::new( "Right", Some(Message::Add))
                       .height(Px(btn_height as u32))
                       .align_left()
                  )
@@ -91,7 +90,7 @@ impl gls::State<Message> for World {
         .add(Row::new()
         .width(Fill)
         .add_attribute(Attribute::Spacing(10.0))
-        .add(Button::new(gl, "Right", Some(Message::Add))
+        .add(Button::new( "Right", Some(Message::Add))
         .width(Px(btn_width as u32))
         .align_right()
         .height(Fill)));

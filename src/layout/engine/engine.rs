@@ -1,4 +1,3 @@
-use internal_types::*;
 use crate::layout::attributes::*;
 use crate::layout::element::Direction;
 use super::*;
@@ -25,12 +24,16 @@ pub fn align_tree<Message>(tree: &mut NodeWithSize<Message>) where Message: fmt:
 fn distribute_children<Message>(tree: &mut NodeWithSize<Message>) where Message: fmt::Debug {
     match tree.node.distribution_dir() {
         Direction::X => distribute_children_x(tree),
-        Direction::Y => todo!()
+        Direction::Y => distribute_children_y(tree),
     };
 }
 
 fn distribute_children_x<Message>(tree: &mut NodeWithSize<Message>) where Message: fmt::Debug {
     use EngineLength::*;
+
+    if tree.children.len() == 0 {
+        return;
+    }
 
     //TODO:  store on layout?
 
@@ -38,14 +41,18 @@ fn distribute_children_x<Message>(tree: &mut NodeWithSize<Message>) where Messag
 
     let mut abs_width = 0.0;
     for c in &tree.children {
-        abs_width = match c.layout.attributes.width {
+        abs_width += match c.layout.attributes.width {
             Px(w) => w,
             _ => 0.0
         };
     }
 
-    let x_spacing = i32::max(0, tree.layout.attributes.width_children) as f32;
-    let dynamic_width = f32::max(0.0, (tree.layout.content_size.w - abs_width)-  - x_spacing);
+    let spacing = tree.layout.attributes.spacing;
+    let total_x_spacing = spacing.x * (i32::max(1, tree.layout.attributes.children_width_count) - 1) as f32;
+    let dynamic_width = f32::max(0.0, (tree.layout.content_size.w - abs_width)  - total_x_spacing);
+
+
+    let mut next_x_offset = 0.0;
 
     for c in tree.children.iter_mut() {
         c.layout.content_size.h = match c.layout.attributes.height {
@@ -58,42 +65,59 @@ fn distribute_children_x<Message>(tree: &mut NodeWithSize<Message>) where Messag
             FillPortion(p) => (dynamic_width / fill_count) * p
         };
 
+        c.layout.position.x += next_x_offset;
+
+        next_x_offset += c.layout.content_size.w + spacing.x;
     }
 }
 
 fn distribute_children_y<Message>(tree: &mut NodeWithSize<Message>) where Message: fmt::Debug {
     use EngineLength::*;
 
+    if tree.children.len() == 0 {
+        return;
+    }
+
     //TODO:  store on layout?
 
+    println!("Dist Y, children ={}", tree.children.len());
     let fill_count = get_fill_count(tree, Direction::Y);
+
+    let spacing = tree.layout.attributes.spacing;
 
     let mut abs_height = 0.0;
     for c in &tree.children {
-        abs_height = match c.layout.attributes.height {
+        abs_height += match c.layout.attributes.height {
             Px(h) => h,
             _ => 0.0
         };
     }
 
-    let y_spacing = i32::max(0, tree.layout.attributes.height_children) as f32;
-    let dynamic_height = f32::max(0.0, (tree.layout.content_size.h - abs_height)-  - y_spacing);
+    let spacing = tree.layout.attributes.spacing;
+    let total_y_spacing = spacing.y * (i32::max(1, tree.layout.attributes.children_height_count) - 1) as f32;
+    let dynamic_height = f32::max(0.0, (tree.layout.content_size.h - abs_height) - total_y_spacing);
 
+    println!("{}.dyn_h = {:?}, content_h = {} y_spacing = {} fill_count = {}", tree.node.name(), dynamic_height, tree.layout.content_size.h, total_y_spacing, fill_count);
+
+    let mut next_y_offset = 0.0;
     for c in tree.children.iter_mut() {
         c.layout.content_size.w = match c.layout.attributes.width {
-            Px(px) => px as f32,
-            _ => c.layout.content_size.w
+            Px(px) => px,
+            FillPortion(p) => c.layout.content_size.w
         };
 
         c.layout.content_size.h = match c.layout.attributes.height {
             Px(px) => px,
             FillPortion(p) => (dynamic_height / fill_count) * p
         };
+
+
+        c.layout.position.y += next_y_offset;
+
+        println!("{}.(h,y) = ({},{})", c.node.name(), c.layout.position.y, c.layout.content_size.h);
+        next_y_offset += c.layout.content_size.h + spacing.y;
     }
 }
-
-
-
 
 
 fn get_fill_count<Message>(tree: &NodeWithSize<Message>, dir: Direction) -> f32 where Message: fmt::Debug {
@@ -131,8 +155,8 @@ fn align_children<Message>(tree: &mut NodeWithSize<Message>) where Message: fmt:
     }
 
 
-    used_width += layout.attributes.spacing.x * i32::max(0, layout.attributes.width_children) as f32;
-    used_height += layout.attributes.spacing.y * i32::max(0, layout.attributes.height_children) as f32;
+    used_width += layout.attributes.spacing.x * i32::max(0, layout.attributes.children_width_count) as f32;
+    used_height += layout.attributes.spacing.y * i32::max(0, layout.attributes.children_height_count) as f32;
 
     let unused_x = f32::max(0.0, content_size.w - used_width);
     let unused_y = f32::max(0.0, content_size.h - used_height);
@@ -147,7 +171,6 @@ fn align_children_x<Message>(tree: &mut NodeWithSize<Message>, mut unused_x: f32
     let mut center_elements_left = None;
     let mut center_elements_right = 0.0;
 
-    println!("Aligning {}.children.x", tree.node.name());
     for c in &tree.children {
 
         match c.layout.attributes.align.x {
@@ -171,8 +194,6 @@ fn align_children_x<Message>(tree: &mut NodeWithSize<Message>, mut unused_x: f32
     }
 
 
-    println!("\nLeft = {:?} right = {} content_w = {}", center_elements_left, center_elements_right, tree.layout.content_size.w);
-
     let mut center_elements_width = match center_elements_left {
         None => None,
         Some(left) => Some(center_elements_right - left)
@@ -188,8 +209,6 @@ fn align_children_x<Message>(tree: &mut NodeWithSize<Message>, mut unused_x: f32
                 match center_elements_width {
                     None => {},
                     Some(offset) => {
-                        println!("\n\n\nCENTER OFFSET = {:?} x_offset = {}", offset, x_offset);
-                        println!("{:?} - {} - {}\n", tree.layout.content_size.w / 2.0, offset / 2.0, center_elements_left.unwrap());
                         let desired_x = tree.layout.content_size.w / 2.0 - offset / 2.0 - center_elements_left.unwrap();
                         let new_offset = f32::max(0.0, desired_x);
                         x_offset += new_offset;
@@ -249,15 +268,12 @@ fn align_children_y<Message>(tree: &mut NodeWithSize<Message>, mut unused_y: f32
     let mut y_offset = 0.0;
 
     for c in tree.children.iter_mut() {
-        println!("{}.align {:?}", c.node.name(), c.layout.attributes.align);
         match c.layout.attributes.align.y {
             AlignmentY::Top => {}, //default is top, do nothing},
             AlignmentY::Center => {
                 match center_elements_height {
                     None => {},
                     Some(offset) => {
-                        println!("{} Center", c.node.name());
-                        println!("content_h = {:?}",c.layout.content_size.h);
                         let desired_y = c.layout.content_size.h / 2.0 - offset / 2.0 - center_elements_left.unwrap();
                         let new_offset = f32::max(0.0, desired_y);
                         y_offset += new_offset;
@@ -274,9 +290,7 @@ fn align_children_y<Message>(tree: &mut NodeWithSize<Message>, mut unused_y: f32
             },
 
         }
-        println!("OLD {}.pos.y = {:?}", c.node.name(), c.layout.position.x);
         c.layout.position.y += y_offset;
-        println!("AFTER {}.pos.y = {:?}\n\n", c.node.name(), c.layout.position.x);
 
     }
 }

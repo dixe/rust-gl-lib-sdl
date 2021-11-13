@@ -1,4 +1,3 @@
-use crate::components::container::*;
 use crate::layout::attributes::{*};
 use crate::layout::element::*;
 use crate::layout::node::*;
@@ -35,11 +34,11 @@ impl<Message> Column<Message> where Message: fmt::Debug {
 
 impl<Message> Element<Message> for Column<Message> where Message: fmt::Debug {
 
-    fn name(&self) -> &str {
-        "column"
+    fn name(&self) -> String {
+        "Column".to_string()
     }
 
-    fn width_children(&self) -> i32 {
+    fn height_children(&self) -> i32 {
         self.children.len() as i32
     }
 
@@ -82,16 +81,6 @@ impl<Message> Element<Message> for Column<Message> where Message: fmt::Debug {
         abs_width
     }
 
-    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
-        if self.children.len() == 0 {
-            return;
-        }
-
-        //self.add_children_to_container(container, available_space, text_renderer);
-
-        return;
-    }
-
     fn pop_children_front(&mut self) -> Option<Node<Message>> {
         self.children.pop_front()
     }
@@ -102,9 +91,7 @@ where
     Message: fmt::Debug  {
 
     fn from(column: Column<Message>) -> Node<Message> {
-        Node {
-            element: Box::new(column)
-        }
+        Box::new(column)
     }
 }
 

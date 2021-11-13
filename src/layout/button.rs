@@ -1,7 +1,6 @@
 use super::*;
 use crate::components::base::*;
 use crate::components::button as comp_btn;
-use crate::components::container::*;
 use crate::layout::attributes::{Attributes};
 use crate::layout::element::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
@@ -11,18 +10,15 @@ use std::fmt;
 
 #[derive(Clone, Debug)]
 pub struct Button<Message> {
-    btn: comp_btn::Button<Message>,
+    content: String,
     attributes: Attributes,
     on_click_msg: Option<Message>
 }
 
 impl<Message> Button<Message> where Message: Clone + fmt::Debug {
-    pub fn new(gl: &gl::Gl, content: &str, msg: Option<Message>) -> Self {
-
-        let btn = comp_btn::Button::new(gl, content, msg.clone());
-
+    pub fn new(content: &str, msg: Option<Message>) -> Self {
         Self {
-            btn,
+            content: content.to_string(),
             attributes: Default::default(),
             on_click_msg: msg
         }
@@ -32,8 +28,8 @@ impl<Message> Button<Message> where Message: Clone + fmt::Debug {
 
 impl<Message> Element<Message> for Button<Message> where Message: Clone + fmt::Debug{
 
-    fn name(&self) -> &str {
-        "button"
+    fn name(&self) -> String {
+        format!("button ({})", &self.content)
     }
     fn attributes(&self) -> &Attributes {
         &self.attributes
@@ -45,33 +41,19 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone + fmt::D
 
     fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         let max_width = self.contrainted_width(available_space);
-        text_renderer.render_box(&self.btn.content, max_width, 1.0).total_height
+        text_renderer.render_box(&self.content, max_width, 1.0).total_height
 
     }
 
     fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         let max_width = self.contrainted_width(available_space);
-        text_renderer.render_box(&self.btn.content, max_width, 1.0).total_width
+        text_renderer.render_box(&self.content, max_width, 1.0).total_width
     }
 
-    fn add_to_container(&self, container: &mut ComponentContainer<Message>, available_space: &RealizedSize, text_renderer: &TextRenderer) {
-
-        // Update out base component to have the correct size
-
-        let mut new_comp: Component<Message> = self.btn.clone().into();
-        new_comp.base.coords.x = available_space.x;
-        new_comp.base.coords.y = available_space.y;
-
-        let final_width = self.final_width(available_space, text_renderer, OnFill::Expand);
-        new_comp.base.set_width(final_width);
-
-        let final_height = self.final_height(available_space, text_renderer, OnFill::Expand);
-        new_comp.base.set_height(final_height);
-
-        let btn: Component<Message> = new_comp.into();
-
-        container.add_component(btn);
-
+    fn create_component(&self, gl: &gl::Gl, comp_base: ComponentBase) -> Option<Component<Message>> {
+        let mut btn: Component<Message> = comp_btn::Button::new(gl, &self.content, self.on_click_msg.clone()).into();
+        btn.base = comp_base;
+        Some(btn)
     }
 
     fn pop_children_front(&mut self) -> Option<Node<Message>> where Message: fmt::Debug {
@@ -86,9 +68,7 @@ where
     Message: Clone + fmt::Debug   {
 
     fn from(button: Button<Message>) -> Node<Message> {
-        Node {
-            element: Box::new(button)
-        }
+        Box::new(button)
     }
 
 }

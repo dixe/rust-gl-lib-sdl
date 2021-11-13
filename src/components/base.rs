@@ -2,7 +2,7 @@ use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::{gl, na, na::Translation3, objects::square, ScreenCoords };
 use crate::components::button::Button;
 use std::fmt::Debug;
-
+use crate::layout;
 
 #[derive(Debug,Clone,Copy)]
 pub enum ComponentEvent {
@@ -103,8 +103,15 @@ impl ComponentBase {
     pub fn window_to_screen_coords(x: f32, y: f32, w: f32, h: f32) -> ScreenCoords {
         ScreenCoords {x : x *2.0/ w  - 1.0, y: -y *2.0 / h + 1.0 }
     }
-
 }
+
+
+impl From<layout::RealizedSize> for ComponentBase {
+    fn from(rs: layout::RealizedSize) -> Self {
+        Self::new(rs.x, rs.y, rs.width, rs.height)
+    }
+}
+
 
 #[derive(Debug,Clone,Copy)]
 pub enum OnTop {

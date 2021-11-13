@@ -48,20 +48,27 @@ fn parent_constraint() {
         .height(FitContent)
         .padding(10.0)
         .spacing(spacing as f32)
-        .add((Button::new(&window.gl(), "Right", Some(Message::Msg1))
+        .add((Button::new("Right", Some(Message::Msg1))
               .width(Px(btn_width as u32))
               .height(Fill)));
 
 
-    let node: Node<Message>  = col.into();
-    let size = RealizedSize { x: 0.0, y: 0.0, width: width as f32, height: height as f32};
-    let mut cont = ComponentContainer::new();
-    node.add_to_container(&mut cont, &size, window.text_renderer());
-    for (_, comp) in &cont.components {
-        println!("{:?}", comp.base);
-        // X should be width - width - spacing
-        assert_eq!(comp.base.height as i32, 211);
+
+    let aligned_elements = engine::align_tree(col.into(), engine::Size { w: width as f32, h: height as f32 }, window.text_renderer());
+
+    let mut found = false;
+    for elm in &aligned_elements {
+        println!("{}.size = {:?}", elm.node.name(), elm.realized_size);
     }
+
+    for elm in &aligned_elements {
+        if elm.node.name() == "button" {
+            assert_eq!(elm.realized_size.height as i32, btn_height );
+        }
+        found = true;
+    }
+
+    assert!(found);
 }
 
 
@@ -87,18 +94,26 @@ fn parent_unconstraint() {
         .height(Fill)
         .padding(padding as f32)
         .spacing(spacing as f32)
-        .add((Button::new(&window.gl(), "Right", Some(Message::Msg1))
+        .add((Button::new("Right", Some(Message::Msg1))
               .width(Px(btn_width as u32))
               .height(Fill)));
 
 
-    let node: Node<Message>  = col.into();
-    let size = RealizedSize { x: 0.0, y: 0.0, width: width as f32, height: height as f32};
-    let mut cont = ComponentContainer::new();
-    node.add_to_container(&mut cont, &size, window.text_renderer());
-    for (_, comp) in &cont.components {
-        println!("{:?}", comp.base);
 
-        assert_eq!(comp.base.height as i32, height as i32 - padding * 2 );
+    let aligned_elements = engine::align_tree(col.into(), engine::Size { w: width as f32, h: height as f32 }, window.text_renderer());
+
+    let mut found = false;
+    for elm in &aligned_elements {
+        println!("{}.size = {:?}", elm.node.name(), elm.realized_size);
     }
+
+    for elm in &aligned_elements {
+        if elm.node.name() == "button" {
+            assert_eq!(elm.realized_size.height as i32, height as i32 - padding * 2);
+        }
+        found = true;
+    }
+
+    assert!(found);
+
 }
