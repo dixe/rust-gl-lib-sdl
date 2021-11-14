@@ -82,9 +82,6 @@ fn distribute_children_y<Message>(tree: &mut NodeWithSize<Message>) where Messag
 
     println!("Dist Y, children ={}", tree.children.len());
     let fill_count = get_fill_count(tree, Direction::Y);
-
-    let spacing = tree.layout.attributes.spacing;
-
     let mut abs_height = 0.0;
     for c in &tree.children {
         abs_height += match c.layout.attributes.height {
@@ -103,7 +100,7 @@ fn distribute_children_y<Message>(tree: &mut NodeWithSize<Message>) where Messag
     for c in tree.children.iter_mut() {
         c.layout.content_size.w = match c.layout.attributes.width {
             Px(px) => px,
-            FillPortion(p) => c.layout.content_size.w
+            FillPortion(_) => c.layout.content_size.w
         };
 
         c.layout.content_size.h = match c.layout.attributes.height {

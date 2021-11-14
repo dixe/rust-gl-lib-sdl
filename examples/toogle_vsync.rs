@@ -2,7 +2,7 @@ use gl_lib_sdl as gls;
 use gl_lib_sdl::{
     window,
     gl_lib::text_rendering::font,
-    gl_lib::{gl, na}
+    gl_lib::na,
 };
 
 
@@ -69,7 +69,7 @@ impl gls::State<Message> for World {
     }
 
 
-    fn view(&self, gl: &gl::Gl) -> gls::layout::node::Node<Message> {
+    fn view(&self) -> gls::layout::node::Node<Message> {
         use gls::layout::element::*;
         use gls::layout::attributes::*;
         use gls::layout::button::*;

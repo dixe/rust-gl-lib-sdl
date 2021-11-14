@@ -1,22 +1,16 @@
 use gl_lib_sdl::layout::{
     column::*,
-    row::*,
-    column::*,
-    attributes::*,
     attributes::Length::*,
     button::*,
     element::*,
-    node::*,
 };
 use gl_lib_sdl::{
-    components::container::ComponentContainer,
     window,
     layout::*,
 };
 
 use gl_lib_sdl::{
-    gl_lib::text_rendering::{text_renderer::TextRenderer, font},
-    gl_lib::{gl, na},
+    gl_lib::text_rendering::font,
 };
 use std::path::Path;
 
@@ -37,7 +31,6 @@ fn parent_constraint() {
     let font = font::Font::load_fnt_font(font_path).unwrap();
     let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
 
-
     let btn_width = 20;
     let spacing = 10;
 
@@ -48,9 +41,9 @@ fn parent_constraint() {
         .height(FitContent)
         .padding(10.0)
         .spacing(spacing as f32)
-        .add((Button::new("Right", Some(Message::Msg1))
-              .width(Px(btn_width as u32))
-              .height(Fill)));
+        .add(Button::new("Right", Some(Message::Msg1))
+             .width(Px(btn_width as u32))
+             .height(Fill));
 
 
 
@@ -94,9 +87,9 @@ fn parent_unconstraint() {
         .height(Fill)
         .padding(padding as f32)
         .spacing(spacing as f32)
-        .add((Button::new("Right", Some(Message::Msg1))
-              .width(Px(btn_width as u32))
-              .height(Fill)));
+        .add(Button::new("Right", Some(Message::Msg1))
+             .width(Px(btn_width as u32))
+             .height(Fill));
 
 
 

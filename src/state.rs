@@ -1,4 +1,3 @@
-use gl_lib::{gl};
 use crate::layout::node::Node;
 use crate::window;
 use std::fmt;
@@ -7,6 +6,6 @@ pub trait State<Message> where Message: fmt::Debug {
 
     fn handle_message(&mut self, message: &Message, windows_acces: &window::WindowComponentAccess);
 
-    fn view(&self, gl: &gl::Gl) -> Node<Message>;
+    fn view(&self) -> Node<Message>;
 
 }

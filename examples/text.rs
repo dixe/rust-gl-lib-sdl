@@ -55,7 +55,7 @@ impl gls::State<Message> for State {
     }
 
 
-    fn view(&self, _gl: &gl::Gl) -> gls::layout::node::Node<Message> {
+    fn view(&self) -> gls::layout::node::Node<Message> {
         use gls::layout::column::*;
 
         let col = Column::new();

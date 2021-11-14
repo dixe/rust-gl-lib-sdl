@@ -137,7 +137,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
         if self.container_dirty {
             let mut cont = ComponentContainer::new();
             let size = (&self.viewport).into();
-            let aligned_tree = engine::align_tree(state.view(&self.gl), size, &self.text_renderer);
+            let aligned_tree = engine::align_tree(state.view(), size, &self.text_renderer);
 
             engine::add_tree_to_container(&self.gl, &mut cont, &aligned_tree);
 

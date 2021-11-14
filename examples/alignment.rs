@@ -1,7 +1,7 @@
 use gl_lib_sdl as gls;
 use gl_lib_sdl::{
     gl_lib::text_rendering::font,
-    gl_lib::{gl, na},
+    gl_lib::{na}
 };
 use failure;
 use std::path::Path;
@@ -45,7 +45,7 @@ struct World {
 
 impl gls::State<Message> for World {
 
-    fn handle_message(&mut self, message: &Message, window_access: &gls::window::WindowComponentAccess) {
+    fn handle_message(&mut self, message: &Message, _window_access: &gls::window::WindowComponentAccess) {
 
         match message {
             Message::Add => { self.total += 1; },
@@ -55,7 +55,7 @@ impl gls::State<Message> for World {
     }
 
 
-    fn view(&self, gl: &gl::Gl) -> gls::layout::node::Node<Message> {
+    fn view(&self) -> gls::layout::node::Node<Message> {
         use gls::layout::row::*;
         use gls::layout::column::*;
         use gls::layout::element::*;

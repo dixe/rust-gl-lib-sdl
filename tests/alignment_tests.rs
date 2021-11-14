@@ -1,12 +1,10 @@
 use gl_lib_sdl::layout::{
     column::*,
     row::*,
-    column::*,
     attributes::*,
     attributes::Length::*,
     button::*,
     element::*,
-    node::*,
 };
 use gl_lib_sdl::{
     window,
@@ -14,8 +12,7 @@ use gl_lib_sdl::{
 };
 
 use gl_lib_sdl::{
-    gl_lib::text_rendering::{text_renderer::TextRenderer, font},
-    gl_lib::{gl, na},
+    gl_lib::text_rendering::{font},
 };
 use std::path::Path;
 
@@ -35,8 +32,6 @@ fn align_left_engine() {
     let font_path = Path::new("./assets/fonts/Arial.fnt");
     let font = font::Font::load_fnt_font(font_path).unwrap();
     let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
-
-    let gl = &window.gl();
 
     let btn_width = 20;
     let spacing = 10;
@@ -84,7 +79,7 @@ fn align_right_engine() {
     let font_path = Path::new("./assets/fonts/Arial.fnt");
     let font = font::Font::load_fnt_font(font_path).unwrap();
     let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
-    let gl = &window.gl();
+
 
     let btn_width = 20;
     let spacing = 10;
@@ -135,7 +130,6 @@ fn align_center_engine() {
     let font_path = Path::new("./assets/fonts/Arial.fnt");
     let font = font::Font::load_fnt_font(font_path).unwrap();
     let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
-    let gl = &window.gl();
 
     let btn_width = 20;
     let spacing = 10;
@@ -181,8 +175,6 @@ fn align_bottom_1_engine() {
     let font_path = Path::new("./assets/fonts/Arial.fnt");
     let font = font::Font::load_fnt_font(font_path).unwrap();
     let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
-
-    let gl = &window.gl();
 
     let btn_height = 40;
     let spacing = 10;
@@ -232,8 +224,6 @@ fn align_bottom_2_engine() {
     let font_path = Path::new("./assets/fonts/Arial.fnt");
     let font = font::Font::load_fnt_font(font_path).unwrap();
     let mut window: window::SdlGlWindow<Message> = window::SdlGlWindow::new("Button", width, height, font).unwrap();
-
-    let gl = &window.gl();
 
     let btn_height = 40;
     let spacing = 10;
