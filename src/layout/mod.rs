@@ -52,3 +52,11 @@ impl From<engine::Size> for RealizedSize {
 
     }
 }
+
+
+
+#[derive(Debug, Clone, Copy)]
+pub enum OnFill {
+    Expand,
+    Shrink
+}

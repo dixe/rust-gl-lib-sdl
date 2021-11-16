@@ -26,7 +26,7 @@ impl<Message> Button<Message> where Message: Clone + fmt::Debug {
 }
 
 
-impl<Message> Element<Message> for Button<Message> where Message: Clone + fmt::Debug{
+impl<Message> Element<Message> for Button<Message> where Message: 'static + Clone + fmt::Debug{
 
     fn name(&self) -> String {
         format!("button ({})", &self.content)
@@ -42,7 +42,6 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone + fmt::D
     fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
         let max_width = self.contrainted_width(available_space);
         text_renderer.render_box(&self.content, max_width, 1.0).total_height
-
     }
 
     fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
@@ -51,8 +50,8 @@ impl<Message> Element<Message> for Button<Message> where Message: Clone + fmt::D
     }
 
     fn create_component(&self, gl: &gl::Gl, comp_base: ComponentBase) -> Option<Component<Message>> {
-        let mut btn: Component<Message> = comp_btn::Button::new(gl, &self.content, self.on_click_msg.clone()).into();
-        btn.base = comp_base;
+        let mut btn: Component<Message> = comp_btn::Button::new(gl, &self.content, self.on_click_msg.clone());
+        btn.set_base(comp_base);
         Some(btn)
     }
 

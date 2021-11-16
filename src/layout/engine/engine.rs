@@ -65,6 +65,7 @@ fn distribute_children_x<Message>(tree: &mut NodeWithSize<Message>) where Messag
             FillPortion(p) => (dynamic_width / fill_count) * p
         };
 
+        //println!("{:?}.h = {}", c.node.name(), c.layout.content_size.h);
         c.layout.position.x += next_x_offset;
 
         next_x_offset += c.layout.content_size.w + spacing.x;
@@ -80,21 +81,27 @@ fn distribute_children_y<Message>(tree: &mut NodeWithSize<Message>) where Messag
 
     //TODO:  store on layout?
 
-    println!("Dist Y, children ={}", tree.children.len());
+    //println!("Dist Y, children = {}", tree.children.len());
     let fill_count = get_fill_count(tree, Direction::Y);
     let mut abs_height = 0.0;
     for c in &tree.children {
         abs_height += match c.layout.attributes.height {
-            Px(h) => h,
+            Px(h) => {
+                //println!("{:?}.attr = {:#?}", c.node.name(),c.layout);
+                h + c.layout.attributes.padding.top + c.layout.attributes.padding.bottom
+            },
             _ => 0.0
         };
     }
 
+
+    //println!("abs_h = {:?}",abs_height);
+
     let spacing = tree.layout.attributes.spacing;
     let total_y_spacing = spacing.y * (i32::max(1, tree.layout.attributes.children_height_count) - 1) as f32;
-    let dynamic_height = f32::max(0.0, (tree.layout.content_size.h - abs_height) - total_y_spacing);
+    let dynamic_height = f32::max(0.0, (tree.layout.height() - abs_height) - total_y_spacing);
 
-    println!("{}.dyn_h = {:?}, content_h = {} y_spacing = {} fill_count = {}", tree.node.name(), dynamic_height, tree.layout.content_size.h, total_y_spacing, fill_count);
+    //println!("{}.dyn_h = {:?}, content_h = {} y_spacing = {} fill_count = {}", tree.node.name(), dynamic_height, tree.layout.content_size.h, total_y_spacing, fill_count);
 
     let mut next_y_offset = 0.0;
     for c in tree.children.iter_mut() {
@@ -111,8 +118,8 @@ fn distribute_children_y<Message>(tree: &mut NodeWithSize<Message>) where Messag
 
         c.layout.position.y += next_y_offset;
 
-        println!("{}.(h,y) = ({},{})", c.node.name(), c.layout.position.y, c.layout.content_size.h);
-        next_y_offset += c.layout.content_size.h + spacing.y;
+        //println!("{}.(h,y) = ({},{})", c.node.name(), c.layout.position.y, c.layout.height());
+        next_y_offset += c.layout.height() + spacing.y;
     }
 }
 

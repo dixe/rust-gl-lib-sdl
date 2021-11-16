@@ -78,4 +78,14 @@ impl LayoutElement {
             position: Point::default(),
         }
     }
+
+    pub fn width(&self) -> f32 {
+        self. content_size.w + self.attributes.padding.top + self.attributes.padding.bottom
+    }
+
+
+    pub fn height(&self) -> f32 {
+        self. content_size.h + self.attributes.padding.left + self.attributes.padding.right
+    }
+
 }

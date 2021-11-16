@@ -1,16 +1,10 @@
-use super::*;
+use crate::layout::*;
 use crate::components::base::*;
 use crate::layout::attributes::{self, Length, LengthConstraint, Attributes, Attribute, AlignmentY, AlignmentX};
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::gl;
 use crate::layout::node::Node;
 use std::fmt;
-
-#[derive(Debug, Clone, Copy)]
-pub enum OnFill {
-    Expand,
-    Shrink
-}
 
 #[derive(Debug, Clone, Copy)]
 pub enum Direction {
@@ -48,7 +42,8 @@ pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
 
     fn final_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer, on_fill: OnFill) -> f32 {
 
-        let h = match self.attributes().height {
+        let attribs = self.attributes();
+        let mut h = match attribs.height {
             Length::Px(px) => {
                 px as f32
             },
@@ -62,12 +57,14 @@ pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
             }
         };
 
-        let attribs = self.attributes();
+        h += attribs.padding.top + attribs.padding.bottom;
+
 
         let min = attribs.height_constraint.min();
         let max = attribs.height_constraint.max(available_space.height);
 
-        f32::min(max, f32::max(min, h))
+        let fh = f32::min(max, f32::max(min, h));
+        fh
 
     }
 

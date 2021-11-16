@@ -41,7 +41,6 @@ impl<Message> Element<Message> for Row<Message> where Message: fmt::Debug {
         self.children.len() as i32
     }
 
-
     fn attributes(&self) -> &Attributes {
         &self.attributes
     }
@@ -57,7 +56,6 @@ impl<Message> Element<Message> for Row<Message> where Message: fmt::Debug {
         for c in &self.children {
             abs_height = f32::max(abs_height, c.final_height(available_space, text_renderer, OnFill::Shrink))
         }
-
         abs_height
     }
 
@@ -151,7 +149,7 @@ FillPortion(x) => { fill_count += x; }
         }
 
 
-        println!("ROW CHILD SPACES {:#?}", child_spaces);
+
         child_spaces
     }
 

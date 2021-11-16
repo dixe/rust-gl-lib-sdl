@@ -156,8 +156,6 @@ FillPortion(x) => { fill_count += x; }
             child_spaces.push(child_space);
         }
 
-        println!("Cols CHild Spaces {:#?}", child_spaces);
-
         child_spaces
     }
 

@@ -1,4 +1,5 @@
 use crate::layout::attributes::{self, LengthConstraint, Alignment, Padding, Spacing};
+use crate::layout::OnFill;
 use super::*;
 use crate::layout::node::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
@@ -59,7 +60,6 @@ fn map_size_to_aligned<Message>(mut sized_node: NodeWithSize<Message>, elements:
 
 fn get_sized_tree<Message>(mut node: Node<Message>, available_space: Size, text_renderer: &TextRenderer) -> NodeWithSize<Message> where Message: fmt::Debug {
 
-
     let attribs = *node.attributes();
     let padding = attribs.padding;
 
@@ -72,16 +72,17 @@ fn get_sized_tree<Message>(mut node: Node<Message>, available_space: Size, text_
         attributes::Length::Px(px) => EngineLength::Px(px as f32),
         attributes::Length::Fill => EngineLength::FillPortion(1.0),
         attributes::Length::FillPortion(p) => EngineLength::FillPortion(p as f32),
-        attributes::Length::FitContent => EngineLength::Px(node.content_width(&content_size.into(), text_renderer) as f32),
+        attributes::Length::FitContent => EngineLength::Px(node.final_width(&content_size.into(), text_renderer, OnFill::Shrink) as f32),
     };
 
     let engine_h = match attribs.height {
         attributes::Length::Px(px) => EngineLength::Px(px as f32),
         attributes::Length::Fill => EngineLength::FillPortion(1.0),
         attributes::Length::FillPortion(p) => EngineLength::FillPortion(p as f32),
-        attributes::Length::FitContent => EngineLength::Px(node.content_height(&content_size.into(), text_renderer) as f32),
+        attributes::Length::FitContent => EngineLength::Px(node.final_height(&content_size.into(), text_renderer, OnFill::Shrink) as f32),
     };
 
+    //println!("{}.Engine_h = {:?}", node.name(), engine_h);
     let mut children = Vec::new();
 
     let width_children = node.width_children();
@@ -99,24 +100,16 @@ fn get_sized_tree<Message>(mut node: Node<Message>, available_space: Size, text_
 
 }
 
-
-
-#[derive(Debug, Clone, Copy)]
-pub enum OnFill {
-    Expand,
-    Shrink
-}
-
 fn final_height<Message>(node: &Node<Message>, attributes: &attributes::Attributes, available_space: Size, text_renderer: &TextRenderer, on_fill: OnFill) -> f32 where Message: fmt::Debug {
 
     let h = match attributes.height {
         attributes::Length::Px(px) => {
             px as f32
         },
-        attributes::Length::FitContent => node.content_height(&(available_space.into()), text_renderer),
+        attributes::Length::FitContent => node.final_height(&(available_space.into()), text_renderer, OnFill::Shrink),
         _ => match on_fill {
             OnFill::Expand => available_space.h,
-            OnFill::Shrink => node.content_height(&(available_space.into()), text_renderer),
+            OnFill::Shrink => node.final_height(&(available_space.into()), text_renderer, OnFill::Shrink),
         }
     };
 
@@ -133,10 +126,10 @@ fn final_width<Message>(node: &Node<Message>, attributes: &attributes::Attribute
         attributes::Length::Px(px) => {
             px as f32
         },
-        attributes::Length::FitContent => node.content_width(&(available_space.into()), text_renderer),
+        attributes::Length::FitContent => node.final_width(&(available_space.into()), text_renderer, OnFill::Shrink),
         _ => match on_fill {
             OnFill::Expand => available_space.w,
-            OnFill::Shrink => node.content_width(&(available_space.into()), text_renderer),
+            OnFill::Shrink => node.final_width(&(available_space.into()), text_renderer, OnFill::Shrink),
         }
     };
 

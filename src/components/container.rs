@@ -1,5 +1,5 @@
 use crate::components::base::{OnTop, Component, ComponentEvent};
-
+use gl_lib::na;
 
 pub enum HandleRes {
     Consumed,
@@ -45,13 +45,13 @@ impl<Message> ComponentContainer<Message> where Message: Clone {
             let c = self.components.get_mut(&event.id);
 
 
-            if let Some(mut comp) = c {
+            if let Some(comp) = c {
                 let _ = match event.event {
                     ComponentEvent::Hover => {
-                        comp.base.hover = true;
+                        comp.base_mut().hover = true;
                     },
                     ComponentEvent::HoverEnd => {
-                        comp.base.hover = false;
+                        comp.base_mut().hover = false;
                     },
                     _ => {},
                 };
@@ -75,7 +75,8 @@ impl<Message> ComponentContainer<Message> where Message: Clone {
             Event::MouseButtonDown {mouse_btn, x, y, ..} => {
                 match mouse_btn {
                     sdl2::mouse::MouseButton::Left => {
-                        res = push_component_event(ComponentEvent::Clicked, x as f32, y as f32, &self.components, &mut self.component_events, None);
+
+                        res = push_component_event(ComponentEvent::Clicked(na::Vector2::new(x,y)), x as f32, y as f32, &self.components, &mut self.component_events, None);
                     },
                     sdl2::mouse::MouseButton::Right => {
 
@@ -102,9 +103,9 @@ impl<Message> ComponentContainer<Message> where Message: Clone {
     }
 }
 
-fn hover_no_match<Message>(key: usize, component: &Component<Message>, component_events: &mut ComponentEvents) {
+fn hover_no_match<Message>(key: usize, component: &Component<Message>, component_events: &mut ComponentEvents) where Message: Clone {
 
-    if component.base.hover {
+    if component.base().hover {
         component_events.push_back(InternalComponentEvent{
             id: key,
             event: ComponentEvent::HoverEnd
