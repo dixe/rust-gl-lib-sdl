@@ -3,40 +3,125 @@ use gl_lib_sdl::{
     gl_lib::{
         gl,
         na,
+        na::Translation3,
         objects::square,
         ScreenCoords,
         ScreenBox,
         shader::Shader,
-        text_rendering::{ text_renderer::TextRenderer },
+        text_rendering::{ text_renderer::{TextRenderer, TextAlignment, TextAlignmentX, TextAlignmentY} },
     }
 };
 
+use std::fmt;
+use crate::game::*;
+
 
 #[derive(Debug)]
-pub struct GameComponent {
-    pub shader: Shader,
+pub struct GameComponent<Message> {
+    pub grid_shader: Shader,
+    pub hidden_shader: Shader,
     pub base: base::ComponentBase,
-    columns: i32,
-    rows: i32
+    columns: usize,
+    rows: usize,
+    clicked_message: fn(Point) -> Message,
+    tiles: [Tile; 9*9],
 }
 
 
-impl GameComponent {
+impl<Message> GameComponent<Message> where Message: Clone  {
 
-    pub fn new(gl: &gl::Gl) -> Box<Self> {
-        let shader = default_shader(gl).unwrap();
+    pub fn new(gl: &gl::Gl, tiles: [Tile; 81], clicked_message: fn(Point) -> Message) -> Box<Self> {
+        let grid_shader = grid_shader(gl).unwrap();
+        let hidden_shader = hidden_tile_shader(gl).unwrap();
 
         Box::new(Self {
-            shader,
+            grid_shader,
+            hidden_shader,
             columns: 9,
             rows: 9,
-            base: Default::default()
+            base: Default::default(),
+            clicked_message,
+            tiles,
         })
+    }
+
+
+    fn render_grid(&self, gl: &gl::Gl, transform: na::Matrix4::<f32>, render_square: &square::Square) {
+
+        self.grid_shader.set_used();
+
+        self.grid_shader.set_mat4(gl, "transform", transform);
+
+        self.grid_shader.set_f32(gl, "height", self.base.height);
+
+        self.grid_shader.set_f32(gl, "width", self.base.width);
+
+        render_square.render(&gl);
+    }
+
+
+    fn render_hidden(&self, gl: &gl::Gl, render_square: &square::Square, screen_w: f32, screen_h: f32) {
+
+        for (i, tile) in self.tiles.iter().enumerate() {
+            match tile {
+
+                Tile::Hidden => {
+                    let p = Point::new(i % 9, i / 9);
+                    let transform = self.hidden_tile_transform_matrix(p, screen_w, screen_h);
+                    self.hidden_shader.set_used();
+
+                    self.hidden_shader.set_mat4(gl, "transform", transform);
+
+                    self.hidden_shader.set_f32(gl, "height", self.base.height / self.rows as f32);
+
+                    self.hidden_shader.set_f32(gl, "width", self.base.width / self.columns as f32);
+
+                    render_square.render(&gl);
+                },
+                _ => {}
+            };
+
+        }
+    }
+
+    pub fn hidden_tile_transform_matrix(&self, point: Point, screen_w: f32, screen_h: f32) -> na::Matrix4::<f32> {
+
+        let sc_top_left = base::ComponentBase::window_to_screen_coords(self.base.x, self.base.y, screen_w, screen_h);
+
+        let screen_x_scale = self.base.width  / screen_w  * 2.0;
+        let screen_y_scale = self.base.height / screen_h * 2.0;
+
+        let x_scale = screen_x_scale * (1.0 / self.columns as f32);
+        let y_scale = screen_y_scale * (1.0 / self.rows as f32);
+        let mut model = na::Matrix4::<f32>::identity();
+
+        // Scale to size
+        model[0] = x_scale;
+        model[5] = y_scale;
+
+        // move to position
+
+        // p.x = 0 should move - self.rows/2  p.x = rows should move self.rows/2
+
+        // scales p goes from -1 .. 1, not really 1 but (rows-1)/rows,
+        let scaled_p_x = point.x as f32 / self.rows as f32 * 2.0 - 1.0; // TODO: when sc_top_left = -1 then 2.0, when 0.0 then 1.0, when 0.8 then 0.2;
+
+        let scaled_p_y = point.y as f32 / self.columns as f32 * (sc_top_left.y + 1.0);
+
+        //panic!();
+        let x_move = scaled_p_x + x_scale * 0.5;
+        let y_move = sc_top_left.y -y_scale * 0.5 - scaled_p_y;// scaled_p_y;// + scaled_p_y;//- y_scale * 0.5;
+
+        let trans = Translation3::new(x_move, y_move, 0.0);
+
+        model = trans.to_homogeneous() * model;
+
+        model
     }
 }
 
 
-impl<Message> base::ComponentTrait<Message> for GameComponent where Message: Clone  {
+impl<Message> base::ComponentTrait<Message> for GameComponent<Message> where Message: Clone + fmt::Debug {
 
     fn base(&self) -> &base::ComponentBase {
         &self.base
@@ -50,21 +135,35 @@ impl<Message> base::ComponentTrait<Message> for GameComponent where Message: Clo
         self.base = base;
     }
 
+
     fn render(&self, gl: &gl::Gl, tr: &mut TextRenderer, render_square: &square::Square, screen_w: f32, screen_h: f32) {
 
-        self.shader.set_used();
+        let grid_transform = self.base.unit_square_transform_matrix(screen_w as f32, screen_h as f32);
 
-        let transform = self.base.unit_square_transform_matrix(screen_w as f32, screen_h as f32);
+        self.render_grid(gl, grid_transform, render_square);
 
-        self.shader.set_mat4(gl, "transform", transform);
+        self.render_hidden(gl, render_square, screen_w, screen_h);
 
-        self.shader.set_f32(gl, "height", self.base.height);
+        /*
+        let grid_tile_h = self.base.height / 9.0;
+        let grid_tile_w = self.base.width / 9.0;
 
-        self.shader.set_f32(gl, "width", self.base.width);
+        let mut r = 1.0;
+        let alignment = TextAlignment {x: TextAlignmentX::Center, y: TextAlignmentY::Center };
+        for (i, tile) in self.tiles.iter().enumerate() {
+        let tile_x = i % 9;
+        let tile_y = i / 9;
+        let x = grid_tile_w * tile_x as f32 + self.base.x;
+        let y = grid_tile_h * tile_y as f32 + self.base.y;
+        tr.render_text(gl, &format!("{}", r), alignment, ScreenBox::new(x, y, grid_tile_w, grid_tile_h, screen_w, screen_h), 1.0);
+        r += 1.;
+    }
+         */
+        // TODO: Render flags places
 
-        self.shader.set_f32(gl, "radius", 0.0); //0.1 / (f32::max(self.base.width / screen_w, self.base.height / screen_h)));
+        // TODO: Render numbers on squares
 
-        render_square.render(&gl);
+
     }
 
     fn update_content(&mut self, _: String) {
@@ -74,15 +173,14 @@ impl<Message> base::ComponentTrait<Message> for GameComponent where Message: Clo
     fn on_event(&self, event: base::ComponentEvent) -> Option<Message> {
         match event {
             base::ComponentEvent::Clicked(vec2) => {
+
                 let offset = na::Vector2::new(self.base.x as i32, self.base.y as i32);
                 let relative = vec2 - offset;
 
-                let x = ((relative.y as f32 / self.base.height ) * self.rows as f32) as i32;
-                let y = ((relative.x as f32 / self.base.width ) * self.columns as f32) as i32;
+                let x = ((relative.y as f32 / self.base.height ) * self.rows as f32) as usize;
+                let y = ((relative.x as f32 / self.base.width ) * self.columns as f32) as usize;
 
-                //println!("(row, column) = ({},{})", x, y);
-
-                None
+                Some((self.clicked_message)(Point::new(x,y)))
 
             },
             _ => None
@@ -91,103 +189,23 @@ impl<Message> base::ComponentTrait<Message> for GameComponent where Message: Clo
 }
 
 
-/// Creates a basic default shader that takes a mat4 transformation uniform transform
-pub fn default_shader(gl: &gl::Gl) -> Result<Shader, failure::Error> {
+/// Creates a shader for rendering a grid on a square (two triangle)
+pub fn grid_shader(gl: &gl::Gl) -> Result<Shader, failure::Error> {
 
     // default program for square
-    let vert_source = r"#version 330 core
-layout (location = 0) in vec3 aPos;
+    let vert_source = std::include_str!("grid_shader.vert");
+    let frag_source = std::include_str!("grid_shader.frag");
 
-uniform mat4 transform;
-
-out VS_OUTPUT {
-    vec2 FragPos;
-    vec2 Pos;
-} OUT;
-
-void main()
-{
-    vec4 pos = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
-    OUT.FragPos = aPos.xy;
-    OUT.Pos = aPos.xy;
-    gl_Position = pos;
-
-}";
-
-    let frag_source = r"
-#version 330 core
-
-
-in VS_OUTPUT {
-    vec2 FragPos;
-    vec2 Pos;
-} IN;
-
-out vec4 FragColor;
-
-uniform float width;
-uniform float height;
-
-
-float grid(vec2 fragCoord, float space_x, float space_y, float gridWidth)
-{
-    vec2 p  = fragCoord - vec2(.5);
-    vec2 size = vec2(gridWidth - .5);
-
-
-    vec2 a1 = vec2(0.);
-    a1.x = mod(p.x - size.x, space_x);
-    a1.y = mod(p.y - size.y, space_y);
-
-    vec2 a2 = vec2(0.);
-    a2.x = mod(p.x + size.x, space_x);
-    a2.y = mod(p.y + size.y, space_y);
-
-
-    vec2 a = a2 - a1;
-
-    float g = min(a.x, a.y);
-    return clamp(g, 0., 1.0);
+    Shader::new(gl, vert_source, frag_source)
 }
 
-float border(vec2 fragCoord, float gridWidth)
-{
-    if(fragCoord.x < gridWidth * 2.0 || fragCoord.x > (width - gridWidth * 2.0) ||
-    fragCoord.y < gridWidth * 2.0 || fragCoord.y > (height - gridWidth * 2.0))
-    {
-        return 0.0;
-    }
-    return 1.0;
-}
 
-void main()
-{
+/// Creates a shader for rendering a hidden tile on a square (two triangle)
+pub fn hidden_tile_shader(gl: &gl::Gl) -> Result<Shader, failure::Error> {
 
-    // maybe look at https://www.shadertoy.com/view/WtdSDs
-
-    // Square is defined with corners in 0.5 and -0.5 on both x and y axis.
-    // multiply by 2 to get -1.0...1.0 range
-    float u = IN.FragPos.x + 0.5;
-    float v = IN.FragPos.y + 0.5;
-
-    vec2 fragCoord = vec2(u * width, v* height);
-
-    if(fragCoord.y  > 100.0)
-    {
-//       discard;
-    }
-
-    //vec3 col = vec3(IN.FragPos.x, IN.FragPos.y, 0.0);
-    vec3 col = vec3(u, v, 0.0);
-    float space_x = width / 9.;
-    float space_y = height / 9.;
-    float grid_width = 2.0;
-    col *= border(fragCoord, grid_width) * grid(fragCoord, space_x, space_y, grid_width);
-
-    float alpha = 1.0;
-    FragColor = vec4(col, alpha);
-
-}";
+    // default program for square
+    let vert_source = std::include_str!("hidden_tile_shader.vert");
+    let frag_source = std::include_str!("hidden_tile_shader.frag");
 
     Shader::new(gl, vert_source, frag_source)
 }

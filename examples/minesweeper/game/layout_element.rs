@@ -10,20 +10,25 @@ use gl_lib_sdl::{
 };
 use gl_lib_sdl::components::base::*;
 use std::fmt;
-
+use crate::game::*;
 
 #[derive(Debug)]
 pub struct GameLayout<Message> {
     attributes: Attributes,
-    win_msg: Option<Message>
+    win_msg: Option<Message>,
+    clicked_message: fn(Point) -> Message,
+    tiles: [Tile; 9*9],
 }
 
 
 impl<Message> GameLayout<Message> where Message: Clone {
-    pub fn new() -> Self {
+    pub fn new(tiles: [Tile; 9*9], clicked_message: fn(Point) -> Message) -> Self {
+
         Self {
             attributes: Default::default(),
-            win_msg: None
+            win_msg: None,
+            clicked_message,
+            tiles,
         }
     }
 }
@@ -53,7 +58,7 @@ impl<Message> Element<Message> for GameLayout<Message> where Message: 'static + 
     }
 
     fn create_component(&self, gl: &gl::Gl, comp_base: ComponentBase) -> Option<Component<Message>> {
-        let mut game: Component<Message> = GameComponent::new(gl);
+        let mut game: Component<Message> = GameComponent::new(gl, self.tiles.clone(), self.clicked_message);
         game.set_base(comp_base);
         Some(game)
     }

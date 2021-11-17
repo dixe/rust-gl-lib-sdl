@@ -14,7 +14,8 @@ use game::*;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Restart
+    Restart,
+    Click(game::Point),
 }
 
 fn main() -> Result<(), failure::Error> {
@@ -30,9 +31,9 @@ fn main() -> Result<(), failure::Error> {
     window.setup_blend();
 
 
-    let mut state = GameState { };
-    while !window.should_quit() {
+    let mut state = GameLogic::default();
 
+    while !window.should_quit() {
         window.update(&mut state);
     }
 
@@ -40,21 +41,61 @@ fn main() -> Result<(), failure::Error> {
 }
 
 
-struct GameState {
 
+#[derive(Debug, Clone)]
+struct GameLogic {
+    initialized: bool,
+    mines: [Point; 10],
+    tiles: [Tile; 9*9],
+}
+
+impl Default for GameLogic {
+    fn default() -> Self {
+        Self {
+            initialized: false,
+            mines: Default::default(),
+            tiles: [Tile::Hidden; 9*9],
+        }
+    }
 }
 
 
 
 
-
-
-impl gls::State<Message> for GameState {
+impl gls::State<Message> for GameLogic {
 
     fn handle_message(&mut self, message: &Message, _window_access: &gls::window::WindowComponentAccess) {
 
         match message {
             Message::Restart => { },
+            Message::Click(p) => {
+
+                if !self.initialized {
+                    self.initialized = true;
+                    self.mines[0] = Point::new(2,7);
+                    self.mines[1] = Point::new(5,2);
+                    self.mines[2] = Point::new(6,7);
+                    self.mines[3] = Point::new(7,1);
+                    self.mines[4] = Point::new(7,2);
+                    self.mines[5] = Point::new(7,5);
+                    self.mines[6] = Point::new(7,7);
+                    self.mines[7] = Point::new(8,1);
+                    self.mines[8] = Point::new(8,4);
+                    self.mines[9] = Point::new(8,7);
+
+                }
+
+                for m in &self.mines {
+                    if p == m {
+                        println!("BOMB at {}", p);
+                    }
+                }
+
+                let i = p.x * 9 + p.y;
+
+                self.tiles[i] = Tile::UnCovered;
+
+            },
         }
     }
 
@@ -83,7 +124,7 @@ impl gls::State<Message> for GameState {
                       .height(Px(50))
                       .align_right()
                  ))
-            .add(GameLayout::new()
+            .add(GameLayout::new(self.tiles.clone(), Message::Click)
                  .height(Fill));
         col.into()
     }

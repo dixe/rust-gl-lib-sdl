@@ -39,10 +39,9 @@ pub fn add_tree_to_container<Message>(gl: &gl::Gl, container: &mut container::Co
         if let Some(comp) = e.node.create_component(gl, base) {
             container.add_component(comp);
         }
-
     }
-
 }
+
 
 fn map_size_to_aligned<Message>(mut sized_node: NodeWithSize<Message>, elements: &mut Vec::<AlignedElement<Message>>) where Message: fmt::Debug {
 
