@@ -5,7 +5,6 @@ use gl_lib_sdl::{
         na,
         na::Translation3,
         objects::square,
-        ScreenCoords,
         ScreenBox,
         shader::Shader,
         text_rendering::{ text_renderer::{TextRenderer, TextAlignment, TextAlignmentX, TextAlignmentY} },
@@ -24,13 +23,13 @@ pub struct GameComponent<Message> {
     columns: usize,
     rows: usize,
     clicked_message: fn(Point) -> Message,
-    tiles: [Tile; 9*9],
+    game_info: GameInfo
 }
 
 
 impl<Message> GameComponent<Message> where Message: Clone  {
 
-    pub fn new(gl: &gl::Gl, tiles: [Tile; 81], clicked_message: fn(Point) -> Message) -> Box<Self> {
+    pub fn new(gl: &gl::Gl, game_info: GameInfo, clicked_message: fn(Point) -> Message) -> Box<Self> {
         let grid_shader = grid_shader(gl).unwrap();
         let hidden_shader = hidden_tile_shader(gl).unwrap();
 
@@ -41,7 +40,7 @@ impl<Message> GameComponent<Message> where Message: Clone  {
             rows: 9,
             base: Default::default(),
             clicked_message,
-            tiles,
+            game_info,
         })
     }
 
@@ -62,25 +61,66 @@ impl<Message> GameComponent<Message> where Message: Clone  {
 
     fn render_hidden(&self, gl: &gl::Gl, render_square: &square::Square, screen_w: f32, screen_h: f32) {
 
-        for (i, tile) in self.tiles.iter().enumerate() {
+        for (i, tile) in self.game_info.tiles.iter().enumerate() {
+            if *tile == Tile::Hidden || *tile == Tile::Bomb {
+
+                let p = Point::new(i % 9, i / 9);
+                let transform = self.hidden_tile_transform_matrix(p, screen_w, screen_h);
+                self.hidden_shader.set_used();
+
+                self.hidden_shader.set_mat4(gl, "transform", transform);
+
+                self.hidden_shader.set_f32(gl, "height", self.base.height / self.rows as f32);
+
+                self.hidden_shader.set_f32(gl, "width", self.base.width / self.columns as f32);
+
+                render_square.render(&gl);
+            }
+        }
+    }
+
+
+    fn render_numbered(&self, gl: &gl::Gl, tr: &mut TextRenderer, screen_w: f32, screen_h: f32) {
+
+        let grid_tile_h = self.base.height / 9.0;
+        let grid_tile_w = self.base.width / 9.0;
+
+        let alignment = TextAlignment {x: TextAlignmentX::Center, y: TextAlignmentY::Center };
+        for (i, tile) in self.game_info.tiles.iter().enumerate() {
+
             match tile {
+                Tile::Numbered(bombs) => {
 
-                Tile::Hidden => {
-                    let p = Point::new(i % 9, i / 9);
-                    let transform = self.hidden_tile_transform_matrix(p, screen_w, screen_h);
-                    self.hidden_shader.set_used();
+                    let tile_x = i % 9;
+                    let tile_y = i / 9;
+                    let x = grid_tile_w * tile_x as f32 + self.base.x;
+                    let y = grid_tile_h * tile_y as f32 + self.base.y;
+                    tr.render_text(gl, &format!("{}", bombs), alignment, ScreenBox::new(x, y, grid_tile_w, grid_tile_h, screen_w, screen_h), 1.0);
 
-                    self.hidden_shader.set_mat4(gl, "transform", transform);
-
-                    self.hidden_shader.set_f32(gl, "height", self.base.height / self.rows as f32);
-
-                    self.hidden_shader.set_f32(gl, "width", self.base.width / self.columns as f32);
-
-                    render_square.render(&gl);
                 },
-                _ => {}
+                _ => {},
             };
+        }
+    }
 
+    fn render_bombs(&self, gl: &gl::Gl, tr: &mut TextRenderer, screen_w: f32, screen_h: f32) {
+        let grid_tile_h = self.base.height / 9.0;
+        let grid_tile_w = self.base.width / 9.0;
+
+
+        let alignment = TextAlignment {x: TextAlignmentX::Center, y: TextAlignmentY::Center };
+        for (i, tile) in self.game_info.tiles.iter().enumerate() {
+            match tile {
+                Tile::Bomb => {
+                    let tile_x = i % 9;
+                    let tile_y = i / 9;
+                    let x = grid_tile_w * tile_x as f32 + self.base.x;
+                    let y = grid_tile_h * tile_y as f32 + self.base.y;
+                    tr.render_text(gl, &format!("B"), alignment, ScreenBox::new(x, y, grid_tile_w, grid_tile_h, screen_w, screen_h), 1.0);
+
+                },
+                _ => {},
+            };
         }
     }
 
@@ -144,26 +184,11 @@ impl<Message> base::ComponentTrait<Message> for GameComponent<Message> where Mes
 
         self.render_hidden(gl, render_square, screen_w, screen_h);
 
-        /*
-        let grid_tile_h = self.base.height / 9.0;
-        let grid_tile_w = self.base.width / 9.0;
+        self.render_numbered(gl, tr, screen_w, screen_h);
 
-        let mut r = 1.0;
-        let alignment = TextAlignment {x: TextAlignmentX::Center, y: TextAlignmentY::Center };
-        for (i, tile) in self.tiles.iter().enumerate() {
-        let tile_x = i % 9;
-        let tile_y = i / 9;
-        let x = grid_tile_w * tile_x as f32 + self.base.x;
-        let y = grid_tile_h * tile_y as f32 + self.base.y;
-        tr.render_text(gl, &format!("{}", r), alignment, ScreenBox::new(x, y, grid_tile_w, grid_tile_h, screen_w, screen_h), 1.0);
-        r += 1.;
-    }
-         */
-        // TODO: Render flags places
-
-        // TODO: Render numbers on squares
-
-
+        if self.game_info.died {
+            self.render_bombs(gl, tr, screen_w, screen_h);
+        }
     }
 
     fn update_content(&mut self, _: String) {

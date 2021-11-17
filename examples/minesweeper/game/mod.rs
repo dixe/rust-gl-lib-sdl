@@ -13,10 +13,16 @@ pub type Point = na::Vector2::<usize>;
 
 
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Tile {
     Hidden,
     UnCovered,
     Numbered(u8),
     Bomb,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GameInfo {
+    pub tiles: [Tile; 9*9],
+    pub died: bool,
 }

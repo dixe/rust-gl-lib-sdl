@@ -1,8 +1,6 @@
 use gl_lib_sdl::layout::{attributes::*, element::Element, node::Node};
 use gl_lib_sdl::layout::*;
-use crate::game::component::*;
 use gl_lib_sdl::{
-    components::base,
     gl_lib::{
         gl,
         text_rendering::{ text_renderer::TextRenderer },
@@ -15,20 +13,20 @@ use crate::game::*;
 #[derive(Debug)]
 pub struct GameLayout<Message> {
     attributes: Attributes,
-    win_msg: Option<Message>,
     clicked_message: fn(Point) -> Message,
-    tiles: [Tile; 9*9],
+    game_info: GameInfo
 }
 
 
+
+
 impl<Message> GameLayout<Message> where Message: Clone {
-    pub fn new(tiles: [Tile; 9*9], clicked_message: fn(Point) -> Message) -> Self {
+    pub fn new(game_info: GameInfo, clicked_message: fn(Point) -> Message) -> Self {
 
         Self {
             attributes: Default::default(),
-            win_msg: None,
             clicked_message,
-            tiles,
+            game_info
         }
     }
 }
@@ -49,16 +47,16 @@ impl<Message> Element<Message> for GameLayout<Message> where Message: 'static + 
         &mut self.attributes
     }
 
-    fn content_height(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+    fn content_height(&self, available_space: &RealizedSize, _text_renderer: &TextRenderer) -> f32 {
         available_space.height
     }
 
-    fn content_width(&self, available_space: &RealizedSize, text_renderer: &TextRenderer) -> f32 {
+    fn content_width(&self, available_space: &RealizedSize, _text_renderer: &TextRenderer) -> f32 {
         available_space.width
     }
 
     fn create_component(&self, gl: &gl::Gl, comp_base: ComponentBase) -> Option<Component<Message>> {
-        let mut game: Component<Message> = GameComponent::new(gl, self.tiles.clone(), self.clicked_message);
+        let mut game: Component<Message> = GameComponent::new(gl, self.game_info, self.clicked_message);
         game.set_base(comp_base);
         Some(game)
     }

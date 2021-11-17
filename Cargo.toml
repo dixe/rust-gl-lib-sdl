@@ -14,3 +14,7 @@ failure = "0.1"
 [dependencies.sdl2]
 version = "0.34.3"
 features = ["bundled", "static-link"]
+
+
+[dev-dependencies]
+rand = "0.8.4"
