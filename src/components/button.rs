@@ -79,7 +79,7 @@ impl<Message> ComponentTrait<Message> for Button<Message> where Message: Clone +
 
     fn on_event(&self, event: ComponentEvent) -> Option<Message> {
         match event {
-            ComponentEvent::Clicked(_) => self.on_click_msg.clone(),
+            ComponentEvent::Clicked(ClickType::Left, _) => self.on_click_msg.clone(),
             _ => None
         }
 

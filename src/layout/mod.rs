@@ -1,16 +1,23 @@
 use gl_lib::{gl::viewport};
 
-pub mod row;
+mod row;
+pub use self::row::*;
 
-pub mod column;
+mod column;
+pub use self::column::*;
 
-pub mod attributes;
+mod attributes;
+pub use self::attributes::*;
 
-pub mod button;
+mod button;
+pub use self::button::*;
 
-pub mod element;
+mod element;
+pub use self::element::*;
 
-pub mod node;
+mod node;
+pub use self::node::*;
+
 
 
 

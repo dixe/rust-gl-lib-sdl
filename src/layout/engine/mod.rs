@@ -1,7 +1,6 @@
 use crate::layout::attributes::{self, LengthConstraint, Alignment, Padding, Spacing};
 use crate::layout::OnFill;
 use super::*;
-use crate::layout::node::*;
 use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::gl;
 use crate::components::container;

@@ -11,6 +11,7 @@ out vec4 FragColor;
 uniform float width;
 uniform float height;
 
+uniform vec3 u_color;
 
 float border(vec2 fragCoord, float gridWidth)
 {
@@ -39,7 +40,7 @@ void main()
     vec2 fragCoord = vec2(u * width, v* height);
 
 
-    vec3 col = base_color(fragCoord);
+    vec3 col = u_color;
     float space_x = width / 9.;
     float space_y = height / 9.;
     float grid_width = 2.0;

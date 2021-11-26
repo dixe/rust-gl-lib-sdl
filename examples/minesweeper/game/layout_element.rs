@@ -1,4 +1,3 @@
-use gl_lib_sdl::layout::{attributes::*, element::Element, node::Node};
 use gl_lib_sdl::layout::*;
 use gl_lib_sdl::{
     gl_lib::{
@@ -13,7 +12,8 @@ use crate::game::*;
 #[derive(Debug)]
 pub struct GameLayout<Message> {
     attributes: Attributes,
-    clicked_message: fn(Point) -> Message,
+    left_clicked_message: fn(Point) -> Message,
+    right_clicked_message: fn(Point) -> Message,
     game_info: GameInfo
 }
 
@@ -21,11 +21,12 @@ pub struct GameLayout<Message> {
 
 
 impl<Message> GameLayout<Message> where Message: Clone {
-    pub fn new(game_info: GameInfo, clicked_message: fn(Point) -> Message) -> Self {
+    pub fn new(game_info: GameInfo, left_clicked_message: fn(Point) -> Message, right_clicked_message: fn(Point) -> Message) -> Self {
 
         Self {
             attributes: Default::default(),
-            clicked_message,
+            left_clicked_message,
+            right_clicked_message,
             game_info
         }
     }
@@ -56,7 +57,7 @@ impl<Message> Element<Message> for GameLayout<Message> where Message: 'static + 
     }
 
     fn create_component(&self, gl: &gl::Gl, comp_base: ComponentBase) -> Option<Component<Message>> {
-        let mut game: Component<Message> = GameComponent::new(gl, self.game_info, self.clicked_message);
+        let mut game: Component<Message> = GameComponent::new(gl, self.game_info, self.left_clicked_message, self.right_clicked_message);
         game.set_base(comp_base);
         Some(game)
     }

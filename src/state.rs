@@ -1,4 +1,4 @@
-use crate::layout::node::Node;
+use crate::layout::Node;
 use crate::window;
 use std::fmt;
 

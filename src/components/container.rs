@@ -1,4 +1,4 @@
-use crate::components::base::{OnTop, Component, ComponentEvent};
+use crate::components::base::{OnTop, Component, ComponentEvent, ClickType};
 use gl_lib::na;
 
 pub enum HandleRes {
@@ -75,10 +75,10 @@ impl<Message> ComponentContainer<Message> where Message: Clone {
             Event::MouseButtonDown {mouse_btn, x, y, ..} => {
                 match mouse_btn {
                     sdl2::mouse::MouseButton::Left => {
-
-                        res = push_component_event(ComponentEvent::Clicked(na::Vector2::new(x,y)), x as f32, y as f32, &self.components, &mut self.component_events, None);
+                        res = push_component_event(ComponentEvent::Clicked(ClickType::Left, na::Vector2::new(x,y)), x as f32, y as f32, &self.components, &mut self.component_events, None);
                     },
                     sdl2::mouse::MouseButton::Right => {
+                        res = push_component_event(ComponentEvent::Clicked(ClickType::Right, na::Vector2::new(x,y)), x as f32, y as f32, &self.components, &mut self.component_events, None);
 
                     },
                     _ => {}

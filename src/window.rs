@@ -13,6 +13,9 @@ pub struct WindowComponentAccess {
     video_subsystem: sdl2::VideoSubsystem,
 }
 
+
+pub type EventHandler = Box::<(dyn FnMut(sdl2::event::Event))>;
+
 impl WindowComponentAccess {
 
     /// Set the vsyn interval, see https://docs.rs/sdl2/0.34.5/sdl2/struct.VideoSubsystem.html#method.gl_set_swap_interval for more info on parameters
@@ -36,7 +39,6 @@ pub struct SdlGlWindow<Message> {
     deltatime: deltatime::Deltatime,
     event_pump: sdl2::EventPump,
     quit: bool,
-    event_handler: Box<dyn Fn(sdl2::event::Event)>,
     text_renderer: text_renderer::TextRenderer,
     render_square: square::Square,
     window_component_access: WindowComponentAccess,
@@ -78,7 +80,6 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
 
         viewport.set_used(&gl);
 
-        let event_handler = Box::new(empty_handler);
 
         let text_renderer = text_renderer::TextRenderer::new(&gl, font);
 
@@ -94,7 +95,6 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
             deltatime: Default::default(),
             event_pump,
             quit: false,
-            event_handler,
             text_renderer,
             render_square,
             window_component_access: WindowComponentAccess {
@@ -106,7 +106,6 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
         })
 
     }
-
 
     pub fn gl(&self) -> &gl::Gl {
         &self.gl
@@ -132,6 +131,14 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
     /// Render components, Swap gl window, update internal delta time and handle sdl_events.
     /// Finish with clearing color_buffer_bit and depth_buffer_bit
     pub fn update(&mut self, state: &mut dyn State<Message>) {
+        self.update_with_handler(state, empty_handler);
+    }
+
+
+    /// Render components, Swap gl window, update internal delta time and handle sdl_events.
+    /// Finish with clearing color_buffer_bit and depth_buffer_bit
+    /// Passes remaining sdl events to the given handle closure
+    pub fn update_with_handler(&mut self, state: &mut dyn State<Message>, event_handler: impl FnMut(sdl2::event::Event)) {
 
 
         if self.container_dirty {
@@ -155,7 +162,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
 
         self.window.gl_swap_window();
         self.deltatime.update();
-        self.handle_events();
+        self.handle_events(event_handler);
 
         // handle state update
 
@@ -208,9 +215,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
 
     }
 
-
-
-    fn handle_events (&mut self) {
+    fn handle_events(&mut self, mut event_handler: impl FnMut(sdl2::event::Event)) {
 
         use sdl2::event::Event;
         for event in self.event_pump.poll_iter() {
@@ -231,8 +236,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
             };
 
             self.container.handle_sdl_event(event.clone());
-
-            (self.event_handler)(event);
+            event_handler(event);
         }
     }
 }

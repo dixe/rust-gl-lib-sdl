@@ -1,9 +1,4 @@
-use gl_lib_sdl::layout::{
-    column::*,
-    attributes::Length::*,
-    button::*,
-    element::*,
-};
+use gl_lib_sdl::layout::{Length::*};
 use gl_lib_sdl::{
     window,
     layout::*,
@@ -33,7 +28,6 @@ fn parent_constraint() {
 
     let btn_width = 20;
     let spacing = 10;
-
 
     let btn_height = 211;
     let col = Column::new()

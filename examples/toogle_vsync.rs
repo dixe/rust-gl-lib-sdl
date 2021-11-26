@@ -69,10 +69,8 @@ impl gls::State<Message> for World {
     }
 
 
-    fn view(&self) -> gls::layout::node::Node<Message> {
-        use gls::layout::element::*;
-        use gls::layout::attributes::*;
-        use gls::layout::button::*;
+    fn view(&self) -> gls::layout::Node<Message> {
+        use gls::layout::*;
 
         use Length::*;
 

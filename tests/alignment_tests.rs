@@ -1,11 +1,4 @@
-use gl_lib_sdl::layout::{
-    column::*,
-    row::*,
-    attributes::*,
-    attributes::Length::*,
-    button::*,
-    element::*,
-};
+use gl_lib_sdl::layout::{Length::*};
 use gl_lib_sdl::{
     window,
     layout::*,
@@ -178,6 +171,7 @@ fn align_bottom_1_engine() {
 
     let btn_height = 40;
     let spacing = 10;
+
 
     let col = Column::new()
         .width(Fill)

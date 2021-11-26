@@ -6,9 +6,15 @@ use crate::layout;
 
 #[derive(Debug,Clone,Copy)]
 pub enum ComponentEvent {
-    Clicked(na::Vector2::<i32>),
+    Clicked(ClickType, na::Vector2::<i32>),
     Hover,
     HoverEnd,
+}
+
+#[derive(Debug,Clone,Copy)]
+pub enum ClickType {
+    Left,
+    Right,
 }
 
 pub type Level = u32;

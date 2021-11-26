@@ -45,8 +45,8 @@ impl gls::State<Message> for State {
     fn handle_message(&mut self, _message: &Message, _window_access: &gls::window::WindowComponentAccess) {
     }
 
-    fn view(&self) -> gls::layout::node::Node<Message> {
-        use gls::layout::column::*;
+    fn view(&self) -> gls::layout::Node<Message> {
+        use gls::layout::*;
 
 
         Column::new().into()
