@@ -174,9 +174,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
         }
 
         unsafe {
-            self
-                .gl
-                .Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
+            self.gl.Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         }
     }
 

@@ -80,7 +80,7 @@ impl LayoutElement {
     }
 
     pub fn width(&self) -> f32 {
-        self. content_size.w + self.attributes.padding.top + self.attributes.padding.bottom
+        self.content_size.w + self.attributes.padding.top + self.attributes.padding.bottom
     }
 
 

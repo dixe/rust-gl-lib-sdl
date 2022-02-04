@@ -49,8 +49,6 @@ fn distribute_children_x<Message>(tree: &mut NodeWithSize<Message>) where Messag
     let spacing = tree.layout.attributes.spacing;
     let total_x_spacing = spacing.x * (i32::max(1, tree.layout.attributes.children_width_count) - 1) as f32;
     let dynamic_width = f32::max(0.0, (tree.layout.content_size.w - abs_width)  - total_x_spacing);
-
-
     let mut next_x_offset = 0.0;
 
     for c in tree.children.iter_mut() {
@@ -64,7 +62,6 @@ fn distribute_children_x<Message>(tree: &mut NodeWithSize<Message>) where Messag
             FillPortion(p) => (dynamic_width / fill_count) * p
         };
 
-        //println!("{:?}.h = {}", c.node.name(), c.layout.content_size.h);
         c.layout.position.x += next_x_offset;
 
         next_x_offset += c.layout.content_size.w + spacing.x;

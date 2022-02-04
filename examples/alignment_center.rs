@@ -64,7 +64,7 @@ impl gls::State<Message> for World {
 
         let col = Column::new()
             .width(Fill)
-            .height(FitContent)
+            .height(Fill)
             .padding(spacing as f32)
             .spacing(spacing as f32)
             .add(Row::new()
@@ -72,6 +72,7 @@ impl gls::State<Message> for World {
                  .add_attribute(Attribute::Spacing(10.0))
                  .add(Button::new( "Center", Some(Message::Add))
                       .width(Px(btn_width as u32))
+                      .width(Fill)
                       .align_center()
                       .height(Fill)));
 
