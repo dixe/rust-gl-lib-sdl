@@ -130,12 +130,20 @@ pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
     }
 
 
-    fn max_width(self, w: LengthConstraint) -> Self where Self: Sized {
-        self.add_attribute(Attribute::WidthConstraint(w))
+    fn max_width(self, max: u32) -> Self where Self: Sized {
+        self.add_attribute(Attribute::WidthConstraint(LengthConstraint::Max(max)))
     }
 
-    fn max_height(self, h: LengthConstraint) -> Self where Self: Sized {
-        self.add_attribute(Attribute::HeightConstraint(h))
+    fn min_width(self, min: u32) -> Self where Self: Sized {
+        self.add_attribute(Attribute::WidthConstraint(LengthConstraint::Min(min)))
+    }
+
+    fn max_height(self, max: u32) -> Self where Self: Sized {
+        self.add_attribute(Attribute::HeightConstraint(LengthConstraint::Max(max)))
+    }
+
+    fn min_height(self, min: u32) -> Self where Self: Sized {
+        self.add_attribute(Attribute::HeightConstraint(LengthConstraint::Max(min)))
     }
 
     fn padding(self, p: f32) -> Self where Self: Sized {

@@ -32,6 +32,8 @@ pub trait Container<Message>: Element<Message> where Message: fmt::Debug {
 
 
     fn children(&self) -> &Vec::<Node<Message>>;
+
+
 }
 
 fn align_child_spaces<Message>(children: &Vec<Node<Message>>, child_spaces: &mut Vec<RealizedSize>, used_space: &UsedSpace , content_space: &RealizedSize) where Message: fmt::Debug {

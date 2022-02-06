@@ -170,6 +170,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
         while let Some(msg) = popped_msg {
             state.handle_message(&msg, &self.window_component_access);
             self.container_dirty = true;
+
             popped_msg = self.container.messages.pop_front();
         }
 
@@ -178,6 +179,10 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
         }
     }
 
+
+    pub fn send_message(&mut self, msg: Message) {
+        self.container.messages.push_back(msg);
+    }
 
     pub fn should_quit(&self) -> bool {
         self.quit
@@ -240,6 +245,6 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
 }
 
 
-fn empty_handler( _:sdl2::event::Event)  {
+fn empty_handler( _:sdl2::event::Event) {
 
 }

@@ -8,3 +8,5 @@ pub mod layout;
 mod state;
 
 pub use self::state::*;
+
+pub use sdl2;
