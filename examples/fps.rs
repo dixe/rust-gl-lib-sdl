@@ -1,8 +1,6 @@
 use gl_lib::*;
-use gl_lib::text_rendering::{font};
 use gl_lib_sdl as gls;
 use failure;
-use std::path::Path;
 
 fn main() -> Result<(), failure::Error> {
 
@@ -10,9 +8,7 @@ fn main() -> Result<(), failure::Error> {
     let width = 800;
     let height = 600;
 
-    let font_path = Path::new("./assets/fonts/Arial.fnt");
-    let font = font::Font::load_fnt_font(font_path).unwrap();
-    let mut window = gls::window::SdlGlWindow::new("Fps", width, height, font).unwrap();
+    let mut window = gls::window::SdlGlWindow::new("Fps", width, height).unwrap();
 
 
     window.set_background_color(na::Vector4::new(0.9, 0.9, 0.9, 1.0));

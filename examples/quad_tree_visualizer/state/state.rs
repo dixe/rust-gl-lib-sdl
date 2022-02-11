@@ -27,12 +27,6 @@ impl State {
         self.square_shader.set_mat4(&self.gl, "transform", na::Matrix4::identity());
         self.square.render(&self.gl);
     }
-
-
-    pub fn handle_events(&mut self, event: sdl2::event::Event) {
-        println!("{:?}", event);
-    }
-
 }
 
 /// Creates a shader for rendering a square (two triangle)

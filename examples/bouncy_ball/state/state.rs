@@ -1,5 +1,5 @@
 use gl_lib_sdl::{
-    gl_lib::{gl, na},
+    gl_lib::gl,
     gl_lib::objects::*,
 };
 

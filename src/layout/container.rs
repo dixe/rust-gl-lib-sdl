@@ -151,9 +151,10 @@ fn align_child_spaces_y<Message>(children: &Vec::<Node<Message>>, child_spaces: 
 
 
     for i in 0..children.len() {
+
         let c = &children[i];
         let cs = &mut child_spaces[i];
-
+        println!("{:?}", c.name());
 
         match c.attributes().align.y {
             AlignmentY::Center => {

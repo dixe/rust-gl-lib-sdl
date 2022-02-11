@@ -92,6 +92,8 @@ impl ComponentBase {
     pub fn window_to_screen_coords(x: f32, y: f32, w: f32, h: f32) -> ScreenCoords {
         ScreenCoords {x : x *2.0/ w  - 1.0, y: -y *2.0 / h + 1.0 }
     }
+
+
 }
 
 

@@ -5,6 +5,7 @@ use gl_lib::text_rendering::{ text_renderer::TextRenderer };
 use gl_lib::gl;
 use crate::layout::node::Node;
 use std::fmt;
+use num;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Direction {
@@ -130,28 +131,38 @@ pub trait Element<Message> : fmt::Debug where Message: fmt::Debug {
     }
 
 
-    fn max_width(self, max: u32) -> Self where Self: Sized {
-        self.add_attribute(Attribute::WidthConstraint(LengthConstraint::Max(max)))
+    fn max_width<T: num::NumCast>(self, max: T) -> Self where Self: Sized {
+        self.add_attribute(Attribute::WidthConstraint(LengthConstraint::Max(num::cast(max).unwrap())))
     }
 
-    fn min_width(self, min: u32) -> Self where Self: Sized {
-        self.add_attribute(Attribute::WidthConstraint(LengthConstraint::Min(min)))
+    fn min_width<T: num::NumCast>(self, min: T) -> Self where Self: Sized {
+        self.add_attribute(Attribute::WidthConstraint(LengthConstraint::Min(num::cast(min).unwrap())))
     }
 
-    fn max_height(self, max: u32) -> Self where Self: Sized {
-        self.add_attribute(Attribute::HeightConstraint(LengthConstraint::Max(max)))
+    fn max_height<T: num::NumCast>(self, max: T) -> Self where Self: Sized {
+        self.add_attribute(Attribute::HeightConstraint(LengthConstraint::Max(num::cast(max).unwrap())))
     }
 
-    fn min_height(self, min: u32) -> Self where Self: Sized {
-        self.add_attribute(Attribute::HeightConstraint(LengthConstraint::Max(min)))
+    fn min_height<T: num::NumCast>(self, min: T) -> Self where Self: Sized {
+        self.add_attribute(Attribute::HeightConstraint(LengthConstraint::Max(num::cast(min).unwrap())))
     }
 
-    fn padding(self, p: f32) -> Self where Self: Sized {
-        self.add_attribute(Attribute::Padding(p))
+    fn padding<T: num::NumCast>(self, p: T) -> Self where Self: Sized {
+        self.add_attribute(Attribute::Padding(num::cast(p).unwrap()))
     }
 
-    fn spacing(self, s: f32) -> Self where Self: Sized {
-        self.add_attribute(Attribute::Spacing(s))
+    fn padding_bottom<T: num::NumCast> (self, p: T) -> Self where Self: Sized {
+        let padding = attributes::Padding {
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            bottom: num::cast(p).unwrap()
+        };
+        self.add_attribute(Attribute::PaddingEach(padding))
+    }
+
+    fn spacing<T: num::NumCast>(self, s: T) -> Self where Self: Sized {
+        self.add_attribute(Attribute::Spacing(num::cast(s).unwrap()))
     }
 
     fn align_center(self) -> Self where Self: Sized {

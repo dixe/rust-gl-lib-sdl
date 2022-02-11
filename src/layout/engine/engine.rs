@@ -91,8 +91,6 @@ fn distribute_children_y<Message>(tree: &mut NodeWithSize<Message>) where Messag
     }
 
 
-    //println!("abs_h = {:?}",abs_height);
-
     let spacing = tree.layout.attributes.spacing;
     let total_y_spacing = spacing.y * (i32::max(1, tree.layout.attributes.children_height_count) - 1) as f32;
     let dynamic_height = f32::max(0.0, (tree.layout.height() - abs_height) - total_y_spacing);

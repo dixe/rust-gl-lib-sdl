@@ -1,13 +1,11 @@
 use gl_lib_sdl as gls;
 use gl_lib_sdl::{
     window,
-    gl_lib::text_rendering::font,
     gl_lib::na,
 };
 
 
 use failure;
-use std::path::Path;
 
 
 #[derive(Debug, Clone)]
@@ -19,9 +17,7 @@ fn main() -> Result<(), failure::Error> {
     let width = 800;
     let height = 600;
 
-    let font_path = Path::new("./assets/fonts/Arial.fnt");
-    let font = font::Font::load_fnt_font(font_path).unwrap();
-    let mut window = gls::window::SdlGlWindow::new("Button", width, height, font).unwrap();
+    let mut window = gls::window::SdlGlWindow::new("Button", width, height).unwrap();
 
 
     window.set_background_color(na::Vector4::new(0.9, 0.9, 0.9, 1.0));

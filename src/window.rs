@@ -52,7 +52,7 @@ pub struct SdlGlWindow<Message> {
 
 impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
 
-    pub fn new(window_text: &str, width: u32, height: u32, font: font::Font ) -> Result<Self, failure::Error> {
+    pub fn new(window_text: &str, width: u32, height: u32 ) -> Result<Self, failure::Error> {
         let sdl = sdl2::init().unwrap();
         let video_subsystem = sdl.video().unwrap();
 
@@ -81,7 +81,7 @@ impl<Message> SdlGlWindow<Message> where Message: Clone + fmt::Debug {
         viewport.set_used(&gl);
 
 
-        let text_renderer = text_renderer::TextRenderer::new(&gl, font);
+        let text_renderer = text_renderer::TextRenderer::new(&gl, font::Font::default());
 
 
         let render_square = square::Square::new(&gl);

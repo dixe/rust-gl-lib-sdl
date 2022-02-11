@@ -10,6 +10,7 @@ edition = "2018"
 gl_lib = { path = "../rust-gl-lib" }
 deltatime = { git = "https://github.com/dixe/rust-deltatime" }
 failure = "0.1"
+num = "0.4.0"
 
 [dependencies.sdl2]
 version = "0.34.3"
